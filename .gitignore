@@ -1,2 +1,2 @@
-# Use git add -f
-*
+# This repo should be setup with git config status.showUntrackedFiles no
+.dotfiles
