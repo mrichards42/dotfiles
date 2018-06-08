@@ -1,13 +1,19 @@
 # Setup
 
-Inspiration from
-https://developer.atlassian.com/blog/2016/02/best-way-to-store-dotfiles-git-bare-repo/
+```bash
+$ git clone git@github.com:mrichards42/dotfiles ~/dotfiles
+$ cd ~/dotfiles
 
+# For all files
+$ ./stow.sh --all
+
+# Or for individual packages
+$ ./stow.sh vim tmux shell
 ```
-curl -fsSL https://raw.githubusercontent.com/mrichards42/dotfiles/master/setup-dotfiles | /bin/bash
-```
 
-# Usage
+`./stow.sh` wraps a copy of [GNU Stow][stow], which requires only `perl`. Stow
+is **not** installed when running `./stow.sh --all`, so if you want that
+installed as well, run `./stow.sh stow`, or better yet, install using homebrew
+or another package manager.
 
-Use `dotfiles` to manage this repo instead of `git`.
-
+ [stow]: https://metacpan.org/pod/distribution/Stow/bin/stow
