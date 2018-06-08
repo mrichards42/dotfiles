@@ -1,0 +1,11 @@
+[user]
+  name = Mike Richards
+  email = mrichards42@gmx.com
+[core]
+  editor = nvim
+  autocrlf = input
+  excludesfile = ~/.gitignore.global
+[alias]
+  tree = log --graph --oneline --decorate
+[include]
+  path = ~/.gitconfig.override
