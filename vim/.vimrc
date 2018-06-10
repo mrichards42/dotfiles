@@ -5,6 +5,7 @@ set nomodeline                         " modelines can execute code
 set number                             " line numbers, of course
 set nowrap
 set encoding=utf-8 fileencoding=utf-8  " always utf-8
+set splitright                         " open vsplits to the right
 set mouse=a                            " a crutch, but sometimes helpful
 if has('mouse_sgr')
   set ttymouse=sgr
