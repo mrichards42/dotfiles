@@ -171,4 +171,11 @@ augroup numbers
   autocmd InsertLeave * hi LineNr ctermbg=235 guibg=#262626
 augroup END
 
+" highlight current line
+augroup CursorLine
+  autocmd!
+  autocmd VimEnter,WinEnter,BufWinEnter * setl cursorline
+  autocmd WinLeave * setl nocursorline
+augroup END
+
 " }}}
