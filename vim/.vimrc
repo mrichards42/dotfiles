@@ -103,6 +103,9 @@ map <Leader>h :noh<CR>
 "    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 call plug#begin('~/.vim/plugged')
+  " Language packs
+  Plug 'sheerun/vim-polyglot'
+
   " Sensible defaults
   Plug 'tpope/vim-sensible'
 
