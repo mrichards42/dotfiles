@@ -4,6 +4,13 @@ let g:clojure_maxlines=50
 
 " Mappings {{{
 
+" Open repl command line
+nmap <buffer> <Leader>e :Eval 
+" Eval current buffer
+nmap <buffer> <Leader>E :%Eval<CR>
+" gd instead of [<C-D> to jump to definition
+nmap <buffer> gd <Plug>FireplaceDjump
+
 " Use only some of the sexp insert mappings
 let g:sexp_enable_insert_mode_mappings = 0
 
