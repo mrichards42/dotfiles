@@ -11,15 +11,23 @@ if [[ "$1" = "--all" ]]; then
     -exec basename {} ';'
   ) )
   # Test and execute, if successful
-  echo "Testing: stow -nv ${PKGS[@]}"
+  echo '###########'
+  echo '# Testing #'
+  echo '###########'
+  echo "# stow -nv ${PKGS[@]}"
   if $STOW -nv "${PKGS[@]}"; then
-    echo "Running: stow ${PKGS[@]}"
-    $STOW "${PKGS[@]}"
+    echo 'No conflicts detected'
+    echo
+    echo '###########'
+    echo '# Running #'
+    echo '###########'
+    echo "# stow -vv ${PKGS[@]}"
+    $STOW -vv "${PKGS[@]}"
   else
     echo
     echo "!! Errors detected !!"
     echo "Please remove existing files, or stow individual packages."
   fi
 else
-  exec $STOW "$@"
+  exec $STOW -vv "$@"
 fi
