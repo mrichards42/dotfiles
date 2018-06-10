@@ -28,7 +28,7 @@ set colorcolumn=+1                     " highlight 80th character
 augroup ws
   autocmd!
   autocmd FileType c,cpp,perl,python setl sw=4 ts=4 sts=4
-  autocmd FileType vim set fdm=marker
+  autocmd FileType vim setl fdm=marker
 augroup END
 
 " }}}
