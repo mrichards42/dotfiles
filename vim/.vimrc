@@ -87,7 +87,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'jnurmine/zenburn'
 
   " Linting
-  Plug 'vim-syntastic/syntastic'
+  Plug 'w0rp/ale'
 
   " File broswer
   Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
@@ -97,6 +97,11 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-surround', { 'for': 'clojure' }
   Plug 'kovisoft/paredit', { 'for': 'clojure' }
 call plug#end()
+
+" Don't lint temp files
+let g:ale_pattern_options = {
+\ '\V\^\(' . expand('$TMPDIR') . '\|/tmp\)': {'ale_linters': [], 'ale_fixers': []},
+\}
 
 " }}}
 
