@@ -40,6 +40,14 @@ augroup END
 noremap j gj
 noremap k gk
 
+" common mistakes
+nmap q: :q
+nmap Q: :q
+cnoreabbrev Q q
+cnoreabbrev qA qa
+cnoreabbrev QA qa
+cnoreabbrev Qa qa
+
 " easy to hit with either hand
 let mapleader = "\<Space>"
 
