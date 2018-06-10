@@ -140,8 +140,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 
   " Clojure
-  Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
-  Plug 'tpope/vim-surround', { 'for': 'clojure' }
+  Plug 'tpope/vim-fireplace'
+  Plug 'tpope/vim-surround'
   Plug 'guns/vim-sexp'
   Plug 'tpope/vim-sexp-mappings-for-regular-people'
 call plug#end()
