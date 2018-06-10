@@ -86,6 +86,10 @@ call plug#begin('~/.vim/plugged')
   " Theme
   Plug 'jnurmine/zenburn'
 
+  " Git
+  Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-rhubarb'
+
   " Linting
   Plug 'w0rp/ale'
 
