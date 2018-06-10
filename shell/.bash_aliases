@@ -1,4 +1,4 @@
-alias vim=nvim
+if type nvim &> /dev/null; then alias vim=nvim; fi
 
 # Decrypt a .gpg version of a credentials file
 function __with_gpg {
