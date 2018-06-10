@@ -1,3 +1,7 @@
+" Shorter search distance for clojure indent (breaks really long forms, but is
+" a huge speed boost)
+let g:clojure_maxlines=50
+
 " Mappings {{{
 
 " Use only some of the sexp insert mappings
