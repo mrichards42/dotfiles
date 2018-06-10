@@ -142,7 +142,8 @@ call plug#begin('~/.vim/plugged')
   " Clojure
   Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
   Plug 'tpope/vim-surround', { 'for': 'clojure' }
-  Plug 'kovisoft/paredit', { 'for': 'clojure' }
+  Plug 'guns/vim-sexp'
+  Plug 'tpope/vim-sexp-mappings-for-regular-people'
 call plug#end()
 
 " Don't lint temp files
