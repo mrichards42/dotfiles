@@ -36,6 +36,10 @@ augroup END
 
 " Mappings {{{
 
+" linewise movement over soft wraps
+noremap j gj
+noremap k gk
+
 " easy to hit with either hand
 let mapleader = "\<Space>"
 
