@@ -83,6 +83,13 @@ call plug#begin('~/.vim/plugged')
   " Sensible defaults
   Plug 'tpope/vim-sensible'
 
+  " Helpful commands
+  Plug 'tpope/vim-eunuch'       " unix commands
+  Plug 'tpope/vim-unimpaired'   " square bracked commands
+  Plug 'tpope/vim-commentary'   " gcc for toggling comments
+  Plug 'tpope/vim-repeat'       " used by multiple plugins for '.' repeating
+  Plug 'tpope/vim-rsi'          " readline keys in insert mode
+
   " Theme
   Plug 'jnurmine/zenburn'
 
