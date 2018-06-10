@@ -114,7 +114,7 @@ set synmaxcol=300  " ignore long lines
 colorscheme zenburn
 
 " dimmer list chars (tab/space)
-hi SpecialKey ctermfg=241 guifg=#626262
+hi Whitespace ctermfg=241 guifg=#626262
 
 " make insert mode *very* obvious
 augroup numbers
