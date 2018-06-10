@@ -60,6 +60,15 @@ nmap <Leader>d :redraw!<CR>
 " NERDTree
 nmap <Leader>t :NERDTreeToggle<CR>
 
+" ack/ag
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep --smart-case'
+  cnoreabbrev ag Ack!
+  cnoreabbrev aG Ack!
+  cnoreabbrev Ag Ack!
+  cnoreabbrev AG Ack!
+endif
+
 " }}}
 
 " Search {{{
@@ -89,6 +98,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-commentary'   " gcc for toggling comments
   Plug 'tpope/vim-repeat'       " used by multiple plugins for '.' repeating
   Plug 'tpope/vim-rsi'          " readline keys in insert mode
+  Plug 'mileszs/ack.vim'        " ack/ag support
 
   " Theme
   Plug 'jnurmine/zenburn'
