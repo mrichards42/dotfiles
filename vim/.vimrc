@@ -29,6 +29,7 @@ augroup ws
   autocmd!
   autocmd FileType c,cpp,perl,python setl sw=4 ts=4 sts=4
   autocmd FileType vim setl fdm=marker
+  autocmd FileType markdown setl wrap linebreak breakindent
 augroup END
 
 " }}}
