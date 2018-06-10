@@ -36,6 +36,8 @@ augroup END
 
 " Mappings {{{
 
+set timeoutlen=300
+
 " linewise movement over soft wraps
 noremap j gj
 noremap k gk
@@ -69,6 +71,18 @@ if executable('ag')
   cnoreabbrev AG Ack!
 endif
 
+" fzf
+nmap <Leader>f :Files<CR>
+nmap <Leader>ff :Files<CR>
+nmap <Leader>fl :Lines<CR>
+nmap <Leader>f/ :BLines<CR>
+nmap <Leader>fb :Buffers<CR>
+
+augroup fzf
+  autocmd!
+  autocmd FileType fzf tnoremap <buffer> <Esc> <C-c>
+augroup END
+
 " }}}
 
 " Search {{{
@@ -99,6 +113,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-repeat'       " used by multiple plugins for '.' repeating
   Plug 'tpope/vim-rsi'          " readline keys in insert mode
   Plug 'mileszs/ack.vim'        " ack/ag support
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all --no-update-rc' }
+  Plug 'junegunn/fzf.vim'       " fuzzy finder
 
   " Theme
   Plug 'jnurmine/zenburn'
