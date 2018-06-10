@@ -179,3 +179,25 @@ augroup CursorLine
 augroup END
 
 " }}}
+
+" Terminal {{{
+
+" terminal esc
+tnoremap <Esc> <C-\><C-n>
+
+" Settings aren't quite the same between vim and nvim
+function! SetupTerm()
+  setl modified  " this doesn't seem to work in nvim, but whatever
+  setl nonumber
+endfunction
+
+augroup term
+  autocmd!
+  if has('nvim')
+    autocmd TermOpen * call SetupTerm()
+  else
+    autocmd BufWinEnter * if &buftype == 'terminal' | call SetupTerm() | endif
+  endif
+augroup END
+
+" }}}
