@@ -156,7 +156,13 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-surround'
   Plug 'guns/vim-sexp'
   Plug 'tpope/vim-sexp-mappings-for-regular-people'
+
+  " Table editing
+  Plug 'dhruvasagar/vim-table-mode'
 call plug#end()
+
+" Fix table header for markdown
+let g:table_mode_corner = '|'
 
 " Don't lint temp files
 let g:ale_pattern_options = {
