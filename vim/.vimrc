@@ -139,7 +139,7 @@ call plug#begin('~/.vim/plugged')
   let g:deoplete#enable_at_startup = 1
 
   " Theme
-  Plug 'jnurmine/zenburn'
+  Plug 'chriskempson/base16-vim'
 
   " Git
   Plug 'tpope/vim-fugitive'
@@ -177,7 +177,19 @@ syntax on
 set t_Co=256
 set synmaxcol=300  " ignore long lines
 
-colorscheme zenburn
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background   " this is always a base16 colorscheme
+
+  " dimmer highlight colors
+  hi Search ctermfg=018 ctermbg=017
+  hi WildMenu ctermfg=018 ctermbg=017
+
+  " dimmer matching bracket
+  hi MatchParen ctermfg=16 ctermbg=241
+else
+  colorscheme zenburn
+endif
 
 " dimmer list chars (tab/space)
 hi Whitespace ctermfg=241 guifg=#626262
