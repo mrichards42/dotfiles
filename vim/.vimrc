@@ -23,6 +23,7 @@ set list lcs=trail:·,nbsp:␣,tab:\>\    " show hidden characters
 
 set textwidth=79 formatoptions-=t      " 79-char lines / don't auto-wrap
 set colorcolumn=+1                     " highlight 80th character
+set foldmethod=marker
 
 " By filetype
 augroup ws
