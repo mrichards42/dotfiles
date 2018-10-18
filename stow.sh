@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-STOW='./stow/.local/code/stow/bin/stow'
+set -eo pipefail
+
+STOW='./stow/bin/stow'
 
 if [[ "$1" = "--all" ]]; then
   # Find all directories that are not hidden, and exclude 'stow'
