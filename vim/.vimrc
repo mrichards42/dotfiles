@@ -196,6 +196,13 @@ augroup CursorLine
   autocmd WinLeave * setl nocursorline
 augroup END
 
+" Markdown syntax additions
+let g:polyglot_disabled = ['markdown']
+let g:markdown_fenced_languages = ['clj=clojure', 'bash=sh']
+" let g:vim_markdown_fenced_languages = ['clj=clojure']
+
+command! DebugSyntax for id in synstack(line("."), col(".")) | echo synIDattr(id, "name") | endfor
+
 " }}}
 
 " Terminal {{{
