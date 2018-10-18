@@ -144,6 +144,11 @@ call plug#begin('~/.vim/plugged')
   " Git
   Plug 'tpope/vim-fugitive'
   Plug 'tpope/vim-rhubarb'
+  augroup fugitive
+    autocmd!
+    " Auto-delete fugitive buffers
+    autocmd BufReadPost fugitive://* set bufhidden=delete
+  augroup END
 
   " Linting
   Plug 'w0rp/ale'
