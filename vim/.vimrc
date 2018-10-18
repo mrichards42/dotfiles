@@ -19,7 +19,7 @@ filetype plugin indent on              " use all filetype-specific things
 
 " Defaults
 set expandtab sw=2 ts=2 sts=2          " 2-space tabs
-set list lcs=trail:*,tab:\>\           " show hidden characters
+set list lcs=trail:·,nbsp:␣,tab:\>\    " show hidden characters
 
 set textwidth=79 formatoptions-=t      " 79-char lines / don't auto-wrap
 set colorcolumn=+1                     " highlight 80th character
