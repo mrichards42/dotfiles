@@ -43,6 +43,12 @@ set timeoutlen=300
 noremap j gj
 noremap k gk
 
+" Indent/deinent using tab
+imap <Tab> <C-t>
+imap <S-Tab> <C-d>
+vmap <Tab> > gv
+vmap <S-Tab> < gv
+
 " common mistakes
 nmap q: :q
 nmap Q: :q
@@ -50,6 +56,9 @@ cnoreabbrev Q q
 cnoreabbrev qA qa
 cnoreabbrev QA qa
 cnoreabbrev Qa qa
+
+" Handy
+cnoreabbrev vsb vertical sbuffer
 
 " easy to hit with either hand
 let mapleader = "\<Space>"
@@ -73,7 +82,6 @@ if executable('ag')
 endif
 
 " fzf
-nmap <Leader>f :Files<CR>
 nmap <Leader>ff :Files<CR>
 nmap <Leader>fl :Lines<CR>
 nmap <Leader>f/ :BLines<CR>
