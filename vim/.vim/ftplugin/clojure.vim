@@ -45,3 +45,10 @@ imap <silent><buffer> "    <Plug>(sexp_insert_double_quote)
 imap <silent><buffer> <BS> <Plug>(sexp_insert_backspace)
 
 " }}}
+
+" REPL {{{
+
+" ClojureScript REPL
+command! Figwheel :execute "Piggieback (do (require 'figwheel-sidecar.repl-api) (figwheel-sidecar.repl-api/repl-env))" | echo 'Connected to Figwheel!'
+
+" }}}
