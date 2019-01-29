@@ -1,6 +1,14 @@
 " Shorter search distance for clojure indent (breaks really long forms, but is
 " a huge speed boost)
-let g:clojure_maxlines=50
+let g:clojure_maxlines=75
+
+" Standard indentation
+let g:clojure_align_subforms=1
+let g:clojure_fuzzy_indent=1
+" default: ['^with', '^def', '^let']
+let g:clojure_fuzzy_indent_patterns=['^with', '^def', '^let', '^try', '^finally', 'fdef', 'cond', 'comment', 'do', 'match', '^go']
+" default ['-fn$', '\v^with-%(meta|out-str|loading-context)$']
+let g:clojure_fuzzy_indent_blacklist = []
 
 " Mappings {{{
 
