@@ -1,0 +1,11 @@
+{:known-macros [krakenstein.seed.impl.defseed/defseed
+                com.climate.newrelic.trace/defn-traced
+                day8.re-frame.tracing/defn-traced
+                day8.re-frame.tracing/fn-traced
+                clojure.test/is
+                clojure.test/deftest
+                clojure.test/testing
+                mount.core/defstate]
+ :rules {:if-without-else true
+         :unused-as false}}
+
