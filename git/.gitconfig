@@ -8,6 +8,12 @@
   attributesfile = ~/.gitattributes.global
 [alias]
   tree = log --graph --oneline --decorate
+  # Idea from https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
+  fzf = !git tree --color=always --branches \
+    | fzf --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
+      --header 'Press CTRL-S to toggle sort' \
+      --preview "\"grep -o '[a-f0-9]\\{7,\\}' <<< {} | xargs git show --color=always\"" \
+    | grep -o '[a-f0-9]\\{7,\\}'
 [include]
   path = ~/.gitconfig.override
 [diff "sopsdiffer"]
