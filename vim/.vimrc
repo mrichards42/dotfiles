@@ -82,15 +82,36 @@ if executable('ag')
 endif
 
 " fzf
-nmap <Leader>ff :Files<CR>
-nmap <Leader>fl :Lines<CR>
-nmap <Leader>f/ :BLines<CR>
-nmap <Leader>fb :Buffers<CR>
 
 augroup fzf
   autocmd!
   autocmd FileType fzf tnoremap <buffer> <Esc> <C-c>
 augroup END
+
+" Redefine the fzf :Files command to prefer git ls-files if we're in a git
+" directory
+function! s:fzf_files(bang)
+  let dir = split(system('git rev-parse --show-toplevel'), '\n')[0]
+  if v:shell_error
+    " This is the default fzf command, without excluding hidden files
+    " Essentially -- exclude system files, print all others
+    let cmd = "bash -c 'set -o pipefail; command "
+    \ . "find -L . -mindepth 1 \\( -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc \\) -prune "
+    \ . "-o -type f -print "
+    \ . "-o -type l -print "
+    \ . "2> /dev/null | cut -b3-'"
+  else
+    let cmd = "bash -c 'cat <(git ls-files --others --exclude-standard) <(git ls-files) | sort'"
+  endif
+  return fzf#vim#files(dir || '', {'source': cmd}, a:bang)
+endfunction
+
+command! -bang -nargs=0 -complete=dir Files call s:fzf_files(<bang>0)
+
+nmap <Leader>ff :Files<CR>
+nmap <Leader>fl :Lines<CR>
+nmap <Leader>f/ :BLines<CR>
+nmap <Leader>fb :Buffers<CR>
 
 " }}}
 
