@@ -5,8 +5,19 @@ let g:clojure_maxlines=75
 " Standard indentation
 let g:clojure_align_subforms=1
 let g:clojure_fuzzy_indent=1
-" default: ['^with', '^def', '^let']
-let g:clojure_fuzzy_indent_patterns=['^with', '^def', '^let', '^try', '^finally', 'fdef', 'cond', 'comment', 'do', 'match', '^go']
+
+" Special indentation forms
+let defaults = ['^with', '^def', '^let']
+let language_features = ['cond', 'comment', 'do', '^try', '^finally']
+let spec = ['^fdef']
+let core_async = ['^go']
+let core_match = ['match']
+let cljs_test = ['use-fixtures']
+let re_frame = ['^fn-traced']
+let g:clojure_fuzzy_indent_patterns=
+      \ defaults + language_features +
+      \ spec + core_async + core_match + cljs_test + re_frame
+
 " default ['-fn$', '\v^with-%(meta|out-str|loading-context)$']
 let g:clojure_fuzzy_indent_blacklist = []
 
