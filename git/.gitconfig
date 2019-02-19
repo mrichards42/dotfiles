@@ -7,6 +7,11 @@
   excludesfile = ~/.gitignore.global
   attributesfile = ~/.gitattributes.global
 [alias]
+  co = checkout
+  ci = commit
+  ca = commit --amend
+  st = status
+  dc = diff --cached
   tree = log --graph --oneline --decorate
   # Idea from https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
   fzf = !git tree --color=always --branches \

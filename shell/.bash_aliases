@@ -2,6 +2,16 @@ if type nvim &> /dev/null; then alias vim=nvim; fi
 
 alias bc='bc -l'
 
+# Git
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gco='git checkout'
+alias gci='git commit'
+alias gca='git commit --amend'
+alias gap='git add -p'
+alias gpo='git push origin'
+alias gs='git status'
+
 # Decrypt a .gpg version of a credentials file
 function __with_gpg {
   local regex="$1"       # regex to search in args
