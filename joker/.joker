@@ -2,9 +2,12 @@
                 com.climate.newrelic.trace/defn-traced
                 day8.re-frame.tracing/defn-traced
                 day8.re-frame.tracing/fn-traced
+                turbovote-web-reframe.tracing/defn-traced
+                turbovote-web-reframe.tracing/fn-traced
                 clojure.test/is
                 clojure.test/deftest
                 clojure.test/testing
+                reagent.core/with-let
                 mount.core/defstate]
  :rules {:if-without-else true
          :unused-as false}}
