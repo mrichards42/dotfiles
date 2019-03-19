@@ -19,7 +19,14 @@
       --header 'Press CTRL-S to toggle sort' \
       --preview "\"grep -o '[a-f0-9]\\{7,\\}' <<< {} | xargs git show --color=always\"" \
     | grep -o '[a-f0-9]\\{7,\\}'
+  # Version tag helpers
+  tag-current = !git tag --sort v:refname | tail -n1
+  tag-next = !git tag-current | perl -pe 's/(\\d+)$/$1 + 1/e'
+  tag-inc = !git tag $(git tag-next) && echo "tagged $(git tag-current)"
+  tag-push = !git push origin $(git tag-current)
 [include]
   path = ~/.gitconfig.override
 [diff "sopsdiffer"]
   textconv = sops -d
+[tag]
+  sort = version:refname
