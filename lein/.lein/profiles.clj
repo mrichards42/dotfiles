@@ -2,7 +2,7 @@
                   [lein-kibit "0.1.5"]
                   [lein-pprint "1.2.0"]
                   [lein-ancient "0.6.15"]
-                  [venantius/ultra "0.5.2"]]
+                  [venantius/ultra "0.6.0"]]
         :dependencies [[cljfmt "0.5.7"]
                        [jonase/kibit "0.1.5"
                         :exclusions [org.clojure/clojure]]
