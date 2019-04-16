@@ -217,6 +217,13 @@ else
   colorscheme zenburn
 endif
 
+set spell
+" remove background highlighting for spellcheck
+hi SpellBad ctermbg=NONE cterm=undercurl
+hi SpellCap ctermbg=NONE cterm=undercurl
+hi SpellRare ctermbg=NONE cterm=undercurl
+hi SpellLocal ctermbg=NONE cterm=undercurl
+
 " dimmer list chars (tab/space)
 hi Whitespace ctermfg=241 guifg=#626262
 
