@@ -2,6 +2,11 @@
 " a huge speed boost)
 let g:clojure_maxlines=75
 
+" Extra syntax highlighting
+let g:clojure_syntax_keywords = {
+    \ 'clojureMacro': ["defproject", "defstate"],
+    \ }
+
 " Standard indentation
 let g:clojure_align_subforms=1
 let g:clojure_fuzzy_indent=1
