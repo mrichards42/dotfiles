@@ -2,6 +2,8 @@ if type nvim &> /dev/null; then alias vim=nvim; fi
 
 alias bc='bc -l'
 
+alias ag='ag --no-number'
+
 # Git
 alias gd='git diff'
 alias gdc='git diff --cached'
