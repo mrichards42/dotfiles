@@ -5,7 +5,12 @@
         :aliases {"kibit" ["with-profile" "+user-kibit" "kibit"]
                   "pprint" ["with-profile" "+user-pprint" "pprint"]
                   "cljfmt" ["with-profile" "+user-cljfmt" "cljfmt"]
-                  "ancient" ["with-profile" "+user-ancient" "ancient"]}}
+                  "ancient" ["with-profile" "+user-ancient" "ancient"]
+                  "rebl" ["with-profile" "+rebl" "repl"]}}
+ :rebl {:dependencies [[org.clojure/core.async "0.4.490"]]
+        :resource-paths ["/Users/mike/REBL-0.9.172/REBL-0.9.172.jar"]
+        :repl-options {:init-ns cognitect.rebl
+                       :welcome (println "Run (cognitect.rebl/ui) to start rebl")}}
  :user-kibit {:plugins [[lein-kibit "0.1.6"]]}
  :user-pprint {:plugins [[lein-pprint "1.2.0"]]}
  :user-cljfmt {:plugins [[lein-cljfmt "0.6.4"]]}
