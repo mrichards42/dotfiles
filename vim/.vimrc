@@ -157,7 +157,6 @@ call plug#begin('~/.vim/plugged')
     Plug 'roxma/nvim-yarp'
     Plug 'roxma/vim-hug-neovim-rpc'
   endif
-  let g:deoplete#enable_at_startup = 1
 
   " Theme
   Plug 'chriskempson/base16-vim'
@@ -182,6 +181,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-surround'
   Plug 'guns/vim-sexp'
   Plug 'tpope/vim-sexp-mappings-for-regular-people'
+  Plug 'clojure-vim/async-clj-omni'
 
   " Table editing
   Plug 'godlygeek/tabular'
@@ -194,6 +194,9 @@ command! -nargs=0 MTable :Tabularize /|
 let g:ale_pattern_options = {
 \ '\V\^\(' . expand('$TMPDIR') . '\|/tmp\)': {'ale_linters': [], 'ale_fixers': []},
 \}
+
+let g:deoplete#enable_at_startup = 1
+call deoplete#custom#option('keyword_patterns', {'clojure': '[\w!$%&*+/:<=>?@\^_~\-\.#]*'})
 
 " }}}
 
