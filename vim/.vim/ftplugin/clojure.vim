@@ -64,6 +64,41 @@ imap <silent><buffer> <BS> <Plug>(sexp_insert_backspace)
 
 " REPL {{{
 
+command! -bang -nargs=? REPL call s:start_repl(<bang>0, <q-args>)
+command! -nargs=? NS call s:set_repl_ns(<q-args>)
+nmap <Leader>in :NS<CR>
+nmap cr <Plug>(neoterm-repl-send)
+nmap crr craf
+
+" These functions require the neoterm plugin
+
+function! s:set_repl_ns(ns)
+  if a:ns != ''
+    let ns_form = '(ns ' . a:ns . ')'
+  else
+    " find the current ns and switch into it
+    let ns_form = matchstr(getline(0, 10), '\v\(ns\s+\S+')
+    let ns_form = ns_form == '' ? '(ns user)' : ns_form . ')'
+  endif
+  call g:neoterm.repl.exec([ns_form])
+endfunction
+
+function! s:start_repl(restart, profile)
+  " clean up any existing repl
+  if a:restart && has_key(g:neoterm.repl, 'instance_id')
+    let inst = g:neoterm.repl.instance()
+    call neoterm#close({'target': g:neoterm.repl.instance_id, 'force': 1})
+    " I think this isn't called until the actual process is closed, but we can
+    " force it here
+    call inst.on_exit()
+  endif
+  if a:profile != ''
+    call neoterm#repl#set('lein with-profile ' . a:profile . ' repl')
+  endif
+  " this will start a new repl if none exists
+  call s:set_repl_ns('')
+endfunction
+
 " ClojureScript REPL
 command! Figwheel :execute "Piggieback (do (require 'figwheel-sidecar.repl-api) (figwheel-sidecar.repl-api/repl-env))" | echo 'Connected to Figwheel!'
 
