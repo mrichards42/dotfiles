@@ -185,6 +185,9 @@ call plug#begin('~/.vim/plugged')
 
   " Table editing
   Plug 'godlygeek/tabular'
+
+  " Helpful terminal interop
+  Plug 'kassio/neoterm'
 call plug#end()
 
 " simple markdown tables
@@ -194,6 +197,10 @@ command! -nargs=0 MTable :Tabularize /|
 let g:ale_pattern_options = {
 \ '\V\^\(' . expand('$TMPDIR') . '\|/tmp\)': {'ale_linters': [], 'ale_fixers': []},
 \}
+
+let g:neoterm_default_mod="vertical"   " open terminals in a vsplit
+let g:neoterm_autoscroll=1             " scroll terminals after sending text
+let g:neoterm_direct_open_repl=1       " don't open an intermediate shell
 
 let g:deoplete#enable_at_startup = 1
 call deoplete#custom#option('keyword_patterns', {'clojure': '[\w!$%&*+/:<=>?@\^_~\-\.#]*'})
