@@ -172,7 +172,7 @@ call plug#begin('~/.vim/plugged')
   augroup END
 
   " Linting
-  Plug 'w0rp/ale'
+  Plug 'dense-analysis/ale'
 
   " File broswer
   Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
