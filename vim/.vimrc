@@ -31,6 +31,7 @@ augroup ws
   autocmd FileType c,cpp,perl,python setl sw=4 ts=4 sts=4
   autocmd FileType vim setl fdm=marker
   autocmd FileType markdown setl wrap linebreak breakindent
+  autocmd FileType GV set foldlevel=1
 augroup END
 
 " }}}
@@ -163,6 +164,7 @@ call plug#begin('~/.vim/plugged')
 
   " Git
   Plug 'tpope/vim-fugitive'
+  Plug 'junegunn/gv.vim'
   Plug 'tpope/vim-rhubarb'
   augroup fugitive
     autocmd!
