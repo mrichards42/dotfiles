@@ -90,9 +90,9 @@ imap <silent><buffer> <BS> <Plug>(sexp_insert_backspace)
 
 command! -bang -nargs=? REPL call s:start_repl(<bang>0, <q-args>)
 command! -nargs=? NS call s:set_repl_ns(<q-args>)
-nmap <Leader>in :NS<CR>
-nmap cr <Plug>(neoterm-repl-send)
-nmap crr craf
+nmap <buffer> <Leader>in :NS<CR>
+nmap <buffer> cr <Plug>(neoterm-repl-send)
+nmap <buffer> crr craf
 
 " These functions require the neoterm plugin
 
