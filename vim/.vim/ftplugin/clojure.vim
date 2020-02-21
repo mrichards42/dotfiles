@@ -1,3 +1,5 @@
+" Indentation {{{
+
 " Shorter search distance for clojure indent (breaks really long forms, but is
 " a huge speed boost)
 let g:clojure_maxlines=75
@@ -25,6 +27,28 @@ let g:clojure_fuzzy_indent_patterns=
 
 " default ['-fn$', '\v^with-%(meta|out-str|loading-context)$']
 let g:clojure_fuzzy_indent_blacklist = []
+
+" Even better -- use zprint
+
+let g:zprint_path = globpath('~/.local/bin', 'zprint*')
+if executable(g:zprint_path)
+  let trim_whitespace = "sed -E 's/ +$//g'"
+
+  let &l:equalprg = g:zprint_path . " '{:style :indent-only}' | " . trim_whitespace
+
+  " Command to zprint a range, with options
+  command! -range=% -nargs=? ZP :execute '<line1>,<line2>! ' . g:zprint_path . ' ' . <q-args> . " | " . trim_whitespace
+
+  " zprint only works on top-level forms, so make the default indentation
+  " target a top-level form
+  let g:sexp_mappings = {'sexp_indent': ''}
+  nmap <buffer><silent> == =aF
+endif
+
+
+
+" }}}
+
 
 " Mappings {{{
 
