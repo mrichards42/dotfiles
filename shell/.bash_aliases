@@ -7,6 +7,15 @@ alias bc=__bc
 
 alias ag='ag --no-number'
 
+__sum_lines() {
+  if [[ -z "$1" ]]; then
+    paste -s -d "+" - | \bc
+  else
+    paste -s -d "+" "$@" | \bc
+  fi
+}
+alias sum-lines=__sum_lines
+
 # Git
 alias gd='git diff'
 alias gdc='git diff --cached'
