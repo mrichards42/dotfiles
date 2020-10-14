@@ -4,11 +4,19 @@
                 day8.re-frame.tracing/fn-traced
                 turbovote-web-reframe.tracing/defn-traced
                 turbovote-web-reframe.tracing/fn-traced
+                turbovote-web-reframe.fsm/defsm
                 clojure.test/is
                 clojure.test/deftest
                 clojure.test/testing
                 reagent.core/with-let
-                mount.core/defstate]
+                mount.core/defstate
+                diehard.core/defretrypolicy
+                diehard.core/defcircuitbreaker
+                turbovote-http-api.kehaar/def-async->fn
+                turbovote-http-api.kehaar/def-async->fire-and-forget-fn
+                turbovote-http-api.kehaar/defchan
+                com.climate.newrelic.trace/defn-traced
+                democracyworks.opentracing.compat/defn-traced]
  :rules {:if-without-else true
          :unused-as false}}
 
