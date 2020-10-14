@@ -1,6 +1,9 @@
 if type nvim &> /dev/null; then alias vim=nvim; fi
 
-alias bc='bc -l'
+__bc() {
+  echo "$@" | bc -l
+}
+alias bc=__bc
 
 alias ag='ag --no-number'
 
