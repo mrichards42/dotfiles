@@ -24,9 +24,20 @@
   tag-next = !git tag-current | perl -pe 's/(\\d+)$/$1 + 1/e'
   tag-inc = !git tag $(git tag-next) && echo "tagged $(git tag-current)"
   tag-push = !git push origin $(git tag-current)
-[include]
-  path = ~/.gitconfig.override
+
 [diff "sopsdiffer"]
   textconv = sops -d
 [tag]
   sort = version:refname
+
+# git-fixup config
+[fixup]
+  menu = fzf --height '60%' \
+              --bind 'tab:toggle-preview' \
+              --preview 'git show --color {+1}' \
+              --preview-window=up:80% \
+              --prompt 'Select commit: '
+	commit = true
+
+[include]
+  path = ~/.gitconfig.override

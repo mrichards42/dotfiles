@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 if type nvim &> /dev/null; then alias vim=nvim; fi
 
 __bc() {
@@ -45,3 +46,79 @@ __with_gpg() {
 alias curl='__with_gpg " -n | --netrc " curl --netrc-file ~/.netrc.gpg'
 alias papertrail='__with_gpg "" papertrail -c ~/.papertrail.yml.gpg'
 alias pt=papertrail
+
+# Babashka functions that work sort of like jq. Use % instead of *input* for
+# each line of edn.
+
+# for edn
+bbq() {
+  if [[ "$1" = "-"* ]]; then
+    bb -I --stream -e '(def % *input*)' "$@"
+  else
+    bb -I --stream -e '(def % *input*)' -e "$@"
+  fi
+}
+
+# for json
+bbjq() {
+  bb -O -e '(json/parsed-seq *in*)' | bbq "$@"
+}
+
+
+
+# stack hack since I can't get linking to work -- run it in the repl
+stack-run() {
+  # this won't work for spaces of course, but w/e
+  local ghci_args=($(echo "$@" | perl -lne '/(.*) -- / && print "$1"'))
+  local main_args=($(echo "$@" | perl -pe 's/.* -- //'))
+  stack repl "${ghci_args[@]}" <<EOF
+:set prompt ""
+putStrLn ""
+putStrLn "=======================================\r"
+putStrLn "${main_args[@]}"
+:main ${main_args[@]}
+putStrLn "=======================================\r"
+:quit
+EOF
+}
+
+# Again, can't get linking to work, so here's a crappy doctest
+
+_stack_doctest_code() {
+  for f in "$@"; do
+    if [[ -d "$f" ]]; then
+      _stack_doctest_code $(find "$f" -name '*.hs' | sort)
+      continue
+    fi
+    if ! ag -- '--[\s|]*>>>' "$f" > /dev/null; then
+      continue
+    fi
+    perl -0777 -ne 'while (/--\s*\$setup.*\n((?:--\s*>>>.*\n)+)|--[\s|]*>>>\s*(.*)\n--\s*(.*)\s*/g) {
+        if ($1) {
+          $setup = $1;
+          $setup =~ s/^--\s*>>>//mg;
+          print "$setup\n";
+          next;
+        }
+        ($a, $e) = ($2, $3);
+        if ($a =~ />>|return|<\$>/) {
+          # $a =~ s/return/(return . show)/;
+          # $e = "(show $e)";
+          print ":echo ($a) == $e\n($a) >>= __doctest ($e)\n";
+        } else {
+          print ":echo ($a) == $e\n__doctest ($e) ($a)\n";
+        }
+      }' "$f" \
+      | cat <(echo ':def! echo \s -> return $ "putStrLn " ++ show s') \
+            <(echo ":load $f") \
+            <(echo '__doctest a b = if a == b then putStrLn "\\ESC[32mTrue\\ESC[0m" else error $ "\\ESC[31mFAILURE!\\n  expected: " ++ show a ++ "\\n  actual: " ++ show b ++ "\\ESC[0m"') \
+            <(echo 'putStrLn "========================================="') \
+            <(echo "putStrLn \"$f\"") \
+            <(echo 'putStrLn "========================================="') \
+            /dev/stdin
+  done
+}
+
+stack-doctest() {
+  _stack_doctest_code "$@" | cat /dev/stdin <(echo ':quit') | stack repl
+}

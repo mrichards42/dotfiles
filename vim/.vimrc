@@ -126,12 +126,36 @@ set hlsearch
 map <Leader>h :noh<CR>
 
 " }}}
+ 
+function! s:project_dir(project_file)
+  let path=expand('%:p:h') " Start with the current dir
+  while path !~ '\v^[\.\/\\]$'
+    let project_file=globpath(path, a:project_file)
+    if project_file != ''
+      return path
+    endif
+    " Knock off the current dir
+    let path = fnamemodify(path, ':h')
+  endwhile
+endfunction
 
-" Plugins {{{
+function! AutoProject(project_file, subdir_depth)
+  let dir = s:project_dir(a:project_file)
+  if dir != ''
+    " And set this buffer's current dir
+    exec 'lcd ' . dir
+    " Set this buffer's search path to the directory with 'project.clj'
+    let &l:path = dir . '/**' . a:subdir_depth
+  endif
+endfunction
 
-" To install vim-plug
-" curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-"    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+augroup projectpaths
+  autocmd!
+  autocmd FileType clojure call AutoProject('project.clj', 3)
+  autocmd FileType javascript call AutoProject('package.json', 3)
+augroup END
+
+let g:ale_disable_lsp = 1
 
 call plug#begin('~/.vim/plugged')
   " Language packs
@@ -151,13 +175,14 @@ call plug#begin('~/.vim/plugged')
   Plug 'junegunn/fzf.vim'       " fuzzy finder
 
   " Autocomplete
-  if has('nvim')
-    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  else
-    Plug 'Shougo/deoplete.nvim'
-    Plug 'roxma/nvim-yarp'
-    Plug 'roxma/vim-hug-neovim-rpc'
-  endif
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+  " if has('nvim')
+  "   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  " else
+  "   Plug 'Shougo/deoplete.nvim'
+  "   Plug 'roxma/nvim-yarp'
+  "   Plug 'roxma/vim-hug-neovim-rpc'
+  " endif
 
   " Theme
   Plug 'chriskempson/base16-vim'
@@ -183,9 +208,14 @@ call plug#begin('~/.vim/plugged')
   Plug 'tpope/vim-surround'
   Plug 'guns/vim-sexp'
   Plug 'tpope/vim-sexp-mappings-for-regular-people'
-  Plug 'clojure-vim/async-clj-omni'
+  Plug 'venantius/vim-cljfmt'
+  "Plug 'clojure-vim/async-clj-omni'
+
+  " Haskell
+  Plug 'neovimhaskell/haskell-vim'
 
   " Table editing
+  "Plug 'dhruvasagar/vim-table-mode'
   Plug 'godlygeek/tabular'
 
   " Helpful terminal interop
@@ -195,21 +225,48 @@ call plug#end()
 " simple markdown tables
 command! -nargs=0 MTable :Tabularize /|
 
-" Don't lint temp files
-let g:ale_pattern_options = {
-\ '\V\^\(' . expand('$TMPDIR') . '\|/tmp\)': {'ale_linters': [], 'ale_fixers': []},
-\}
+" Don't auto-format files
+let g:clj_fmt_autosave = 0
 
 let g:neoterm_default_mod="vertical"   " open terminals in a vsplit
 let g:neoterm_autoscroll=1             " scroll terminals after sending text
 let g:neoterm_direct_open_repl=1       " don't open an intermediate shell
 
-let g:deoplete#enable_at_startup = 1
-call deoplete#custom#option('keyword_patterns', {'clojure': '[\w!$%&*+/:<=>?@\^_~\-\.#]*'})
+" let g:deoplete#enable_at_startup = 1
+" call deoplete#custom#option('keyword_patterns', {'clojure': '[\w!$%&*+/:<=>?@\^_~\-\.#]*'})
 
+" Don't lint temp files
+let g:ale_pattern_options = {
+\ '\V\^\(' . expand('$TMPDIR') . '\|/tmp\)': {'ale_linters': [], 'ale_fixers': []},
+\}
 " }}}
 
+" Nicer error display (from ALE readme)
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+" nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
+
 " Syntax {{{
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
 syntax on
 set t_Co=256
@@ -255,8 +312,7 @@ augroup END
 
 " Markdown syntax additions
 let g:polyglot_disabled = ['markdown']
-let g:markdown_fenced_languages = ['clj=clojure', 'bash=sh', 'vim']
-" let g:vim_markdown_fenced_languages = ['clj=clojure']
+let g:markdown_fenced_languages = ['clj=clojure', 'bash=sh', 'vim', 'cpp']
 
 command! DebugSyntax for id in synstack(line("."), col(".")) | echo synIDattr(id, "name") | endfor
 
@@ -282,4 +338,21 @@ augroup term
   endif
 augroup END
 
+" Open a hidden terminal, optionally running a command
+" Returns the buffer number
+function! HiddenTerm(...)
+  tabnew
+  if a:0 > 0
+    exe "terminal " . a:1
+  else
+    terminal
+  endif
+  setl bufhidden=hide
+  let bufnr = bufnr('%')
+  tabclose
+  return bufnr
+endfunction
+
 " }}}
+
+autocmd BufNewFile,BufRead *.cpy set ft=cpp

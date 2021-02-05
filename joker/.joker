@@ -16,7 +16,8 @@
                 turbovote-http-api.kehaar/def-async->fire-and-forget-fn
                 turbovote-http-api.kehaar/defchan
                 com.climate.newrelic.trace/defn-traced
-                democracyworks.opentracing.compat/defn-traced]
+                democracyworks.opentracing.compat/defn-traced
+                clojure.test.check.generators/let]
  :rules {:if-without-else true
          :unused-as false}}
 
