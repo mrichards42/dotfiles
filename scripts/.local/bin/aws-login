@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+aws-vault list --profiles | grep -Fx "$1" > /dev/null || {
+  echo "unknown profile: $1"
+  exit 1
+}
+
+url=$(aws-vault login -s "$@")
+if [[ -n "$url" ]]; then
+  escaped_url="$(printf '%s' "$url" | jq -sRr @uri)"
+  # For use with
+  # * https://addons.mozilla.org/en-US/firefox/addon/multi-account-containers/
+  # * https://addons.mozilla.org/en-US/firefox/addon/open-url-in-container/
+  # Though see this PR in case the functionality of open-url-in-container ever
+  # gets added to firefox
+  # * https://github.com/mozilla/multi-account-containers/issues/365
+  /Applications/Firefox.app/Contents/MacOS/firefox "ext+container:name=aws-$1&url=$escaped_url"
+fi
