@@ -15,7 +15,7 @@ let g:clojure_fuzzy_indent=1
 
 " Special indentation forms
 let defaults = ['^with', '^def', '^let']
-let language_features = ['cond', 'comment', '^do$', '^try', '^finally']
+let language_features = ['cond', 'comment', '^do$', '^try', '^finally', 'delay']
 let spec = ['^fdef']
 let core_async = ['^go']
 let core_match = ['match']
