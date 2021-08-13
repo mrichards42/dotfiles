@@ -45,3 +45,18 @@ __with_gpg() {
 alias curl='__with_gpg " -n | --netrc " curl --netrc-file ~/.netrc.gpg'
 alias papertrail='__with_gpg "" papertrail -c ~/.papertrail.yml.gpg'
 alias pt=papertrail
+
+# using fzf as a jq repl
+jqrepl() {
+  local input;
+  if [[ -z "$1" ]]; then
+    input=$(cat /dev/stdin)
+  else
+    input=$(cat "$1")
+  fi
+  # shellcheck disable=SC2016
+  echo '' | input="$input" fzf \
+    --disabled \
+    --preview-window=down,100 \
+    --preview 'printf %s "$input" | jq -C {q}'
+}
