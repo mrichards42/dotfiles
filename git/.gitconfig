@@ -43,3 +43,5 @@
   path = ~/.gitconfig.override
 [pull]
 	ff = only
+[init]
+	defaultBranch = main
