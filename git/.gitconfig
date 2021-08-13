@@ -41,3 +41,5 @@
 
 [include]
   path = ~/.gitconfig.override
+[pull]
+	ff = only
