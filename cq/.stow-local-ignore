@@ -1,0 +1,2 @@
+# Only include things in .local
+^(?!/\.local)

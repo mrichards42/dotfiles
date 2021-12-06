@@ -1,0 +1,55 @@
+(ns clojure.data.csv
+  (:require [joker.string :as str]))
+
+(in-ns 'user) ;; not sure what's up here, but otherwise I get an error on lazy-seq
+(require '[joker.string :as str])
+(defn- at [s i] (subs s i (inc i)))
+
+(defn- index-of-end-quote [s from str-len]
+  (when-let [end (str/index-of s \" from)]
+    (if (and (< (inc end) str-len) (= "\"" (at s (inc end))))
+      (recur s (+ 2 end) str-len)
+      end)))
+
+(defn- read-quoted-field [s from str-len]
+  (let [start (inc from)
+        end (index-of-end-quote s start str-len)]
+    (if end
+      [(str/replace (subs s start end) #"\"\"" "\"") (+ 2 end)]
+      (throw (ex-info "Quoted field missing end quote!" {:position from})))))
+
+(defn- read-unquoted-field [s from str-len]
+  (let [comma (str/index-of s \, from)
+        end-row (str/index-of s \newline from)]
+    (cond
+      (and (nil? comma) (nil? end-row)) [(subs s from) nil]
+      (< (or comma str-len) (or end-row str-len)) [(subs s from comma) (inc comma)]
+      :else [(subs s from end-row) end-row])))
+
+(defn- read-next-field [s from str-len]
+  (case (at s from)
+    "," ["" (inc from)]
+    "\n" [nil (inc from)]
+    "\r" (recur s (inc from) str-len)
+    "\"" (read-quoted-field s from  str-len)
+    (read-unquoted-field s from str-len)))
+
+(defn- read-next-row
+  [s from str-len]
+  (loop [row []
+         from from]
+    (if (and from (< from str-len))
+      (let [[field next-from] (read-next-field s from str-len)]
+        (if field
+          (recur (conj row field) next-from)
+          [row next-from]))
+      [row from])))
+
+(defn read-csv*
+  [s from str-len]
+  (lazy-seq
+    (when (and from (< from str-len))
+      (let [[row next-from] (read-next-row s from str-len)]
+        (cons row (read-csv* s next-from str-len))))))
+
+(defn read-csv [s] (read-csv* s 0 (count s)))

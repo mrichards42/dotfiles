@@ -1,0 +1,5 @@
+(ns clojure.data.json)
+(use 'joker.json)
+
+#_(def read-string joker.json/read-string)
+#_(def write-string joker.json/write-string)

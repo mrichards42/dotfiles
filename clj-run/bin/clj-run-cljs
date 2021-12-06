@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Lumo script runner
+# Usage runner.cljs [-c CLASSPATH] -m NAMESPACE[/MAIN_FUNCTION] [ARGS...]
+
+cp=$(cd "$(dirname $(realpath "$0"))/../lib" && pwd)
+exec lumo -c "$cp" "$@"

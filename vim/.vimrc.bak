@@ -1,0 +1,333 @@
+" rewrite vimrc when the md file changes
+let s:literatevim = resolve(expand('<sfile>:p:h')) . '/literatevim '
+augroup literatevimrc
+  autocmd!
+  autocmd BufWritePost *vimrc.md,*.vim.md exec '!' . s:literatevim . expand('%')
+augroup END
+
+" Basic settings {{{
+
+set nomodeline                         " modelines can execute code
+set number                             " line numbers, of course
+set nowrap
+set encoding=utf-8 fileencoding=utf-8  " always utf-8
+set splitright                         " open vsplits to the right
+set mouse=a                            " a crutch, but sometimes helpful
+if has('mouse_sgr')
+  set ttymouse=sgr
+endif
+
+filetype plugin indent on              " use all filetype-specific things
+
+" }}}
+
+" Whitespace / Formatting {{{
+
+" Defaults
+set expandtab sw=2 ts=2 sts=2          " 2-space tabs
+set list lcs=trail:·,nbsp:␣,tab:\>\    " show hidden characters
+
+set textwidth=79 formatoptions-=t      " 79-char lines / don't auto-wrap
+set colorcolumn=+1                     " highlight 80th character
+set foldmethod=marker
+
+" By filetype
+augroup ws
+  autocmd!
+  autocmd FileType c,cpp,perl,python setl sw=4 ts=4 sts=4
+  autocmd FileType vim setl fdm=marker
+  autocmd FileType markdown setl wrap linebreak breakindent
+augroup END
+
+" }}}
+
+" Mappings {{{
+
+" set timeoutlen=300
+
+" linewise movement over soft wraps
+noremap j gj
+noremap k gk
+
+" Indent/deinent using tab
+imap <Tab> <C-t>
+imap <S-Tab> <C-d>
+vmap <Tab> > gv
+vmap <S-Tab> < gv
+
+" common mistakes
+nmap q: :q
+nmap Q: :q
+cnoreabbrev Q q
+cnoreabbrev qA qa
+cnoreabbrev QA qa
+cnoreabbrev Qa qa
+
+" Handy
+cnoreabbrev vsb vertical sbuffer
+
+" easy to hit with either hand
+let mapleader = "\<Space>"
+
+" run current file
+nmap <Leader>r :!%p
+
+" redraw
+nmap <Leader>d :redraw!<CR>
+
+" NERDTree
+nmap <Leader>t :NERDTreeToggle<CR>
+
+" ack/ag
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep --smart-case'
+  cnoreabbrev ag Ack!
+  cnoreabbrev aG Ack!
+  cnoreabbrev Ag Ack!
+  cnoreabbrev AG Ack!
+endif
+
+" fzf
+nmap <Leader>ff :Files<CR>
+nmap <Leader>fl :Lines<CR>
+nmap <Leader>f/ :BLines<CR>
+nmap <Leader>fb :Buffers<CR>
+
+" fzf the echo'd result of running a command
+command! -bang -nargs=+ Fecho
+  \ call fzf#run(fzf#wrap('text', {'source': split(execute('<args>'), '\n')}, <bang>0))
+
+" fzf scriptnames
+command! -bang Fscriptnames
+  \ call fzf#run(fzf#wrap('text', {
+  \   'source': map(split(execute('scriptnames'), '\n'),
+  \                 {key, val -> substitute(val, '\v^\s*[0-9.:]*\s+', "", "")})
+  \ }, <bang>0))
+
+augroup fzf
+  autocmd!
+  autocmd FileType fzf tnoremap <buffer> <Esc> <C-c>
+augroup END
+
+" }}}
+
+" Search {{{
+
+set incsearch            " incremental search
+set ignorecase smartcase " ignore case unless term has an uppercase char
+
+" highlight all search terms / Leader-h removes highlight
+set hlsearch
+map <Leader>h :noh<CR>
+
+" }}}
+
+" Project settings {{{
+
+function! s:project_dir(project_file)
+  let path=expand('%:p:h') " Start with the current dir
+  while path !~ '\v^[\.\/\\]$'
+    let project_file=globpath(path, a:project_file)
+    if project_file != ''
+      return path
+    endif
+    " Knock off the current dir
+    let path = fnamemodify(path, ':h')
+  endwhile
+endfunction
+
+function! AutoProject(project_file, subdir_depth)
+  let dir = s:project_dir(a:project_file)
+  if dir != ''
+    " And set this buffer's current dir
+    exec 'lcd ' . dir
+    " Set this buffer's search path to the directory with 'project.clj'
+    let &l:path = dir . '/**' . a:subdir_depth
+  endif
+endfunction
+
+augroup projectpaths
+  autocmd!
+  autocmd FileType clojure call AutoProject('project.clj', 3)
+  autocmd FileType javascript call AutoProject('package.json', 3)
+augroup END
+
+" }}}
+
+" Plugins {{{
+
+" To install vim-plug
+" curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+"    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+call plug#begin('~/.vim/plugged')
+  " Language packs
+  Plug 'sheerun/vim-polyglot'
+
+  " Sensible defaults
+  Plug 'tpope/vim-sensible'
+
+  " Helpful commands
+  Plug 'tpope/vim-eunuch'       " unix commands
+  Plug 'tpope/vim-unimpaired'   " square bracked commands
+  Plug 'tpope/vim-commentary'   " gcc for toggling comments
+  Plug 'tpope/vim-repeat'       " used by multiple plugins for '.' repeating
+  Plug 'tpope/vim-rsi'          " readline keys in insert mode
+  Plug 'mileszs/ack.vim'        " ack/ag support
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all --no-update-rc' }
+  Plug 'junegunn/fzf.vim'       " fuzzy finder
+
+  " Autocomplete
+  if has('nvim')
+    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  else
+    Plug 'Shougo/deoplete.nvim'
+    Plug 'roxma/nvim-yarp'
+    Plug 'roxma/vim-hug-neovim-rpc'
+  endif
+
+  " Theme
+  Plug 'chriskempson/base16-vim'
+
+  " Git
+  Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-rhubarb'
+  augroup fugitive
+    autocmd!
+    " Auto-delete fugitive buffers
+    autocmd BufReadPost fugitive://* set bufhidden=delete
+  augroup END
+
+  " Linting
+  Plug 'w0rp/ale'
+
+  " File broswer
+  Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+
+  " Clojure
+  Plug 'tpope/vim-fireplace'
+  Plug 'tpope/vim-surround'
+  Plug 'guns/vim-sexp'
+  Plug 'tpope/vim-sexp-mappings-for-regular-people'
+  Plug 'venantius/vim-cljfmt'
+  " This floods the repl w/ junk error messages and makes it unusable.
+  " Unfortunately it's also how I use kibit
+  Plug 'SevereOverfl0w/clojure-check', {'do': './install', 'for': 'python'}
+  Plug 'clojure-vim/async-clj-omni'
+
+  " Table editing
+  Plug 'dhruvasagar/vim-table-mode'
+call plug#end()
+
+" Fix table header for markdown
+let g:table_mode_corner = '|'
+
+" Don't auto-format files
+let g:clj_fmt_autosave = 0
+
+" Don't lint temp files
+let g:ale_pattern_options = {
+\ '\V\^\(' . expand('$TMPDIR') . '\|/tmp\)': {'ale_linters': [], 'ale_fixers': []},
+\}
+
+" }}}
+
+" Completion {{{
+
+let g:deoplete#enable_at_startup = 1
+
+" None of this does what I want it to
+let g:deoplete#keyword_patterns = {}
+let g:deoplete#keyword_patterns.clojure = '[\w!$%&*+/:<=>?@\^_~\-\.#]*'
+call deoplete#custom#option({
+      \ 'complete_method': 'omnifunc',
+      \ })
+augroup deoplete
+  autocmd!
+  autocmd CompleteDone * pclose!
+augroup END
+
+"}}}
+
+" Syntax {{{
+
+syntax on
+set t_Co=256
+set synmaxcol=300  " ignore long lines
+
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background   " this is always a base16 colorscheme
+
+  " dimmer highlight colors
+  hi Search ctermfg=018 ctermbg=017
+  hi WildMenu ctermfg=018 ctermbg=017
+
+  " dimmer matching bracket
+  hi MatchParen ctermfg=16 ctermbg=241
+else
+  colorscheme zenburn
+endif
+
+" dimmer list chars (tab/space)
+hi Whitespace ctermfg=241 guifg=#626262
+
+" make insert mode *very* obvious
+augroup numbers
+  autocmd!
+  autocmd InsertEnter * hi LineNr ctermbg=60 guibg=#5f5f87
+  autocmd InsertLeave * hi LineNr ctermbg=235 guibg=#262626
+augroup END
+
+" highlight current line
+augroup CursorLine
+  autocmd!
+  autocmd VimEnter,WinEnter,BufWinEnter * setl cursorline
+  autocmd WinLeave * setl nocursorline
+augroup END
+
+" Markdown syntax additions
+let g:polyglot_disabled = ['markdown']
+let g:markdown_fenced_languages = ['clj=clojure', 'bash=sh']
+" let g:vim_markdown_fenced_languages = ['clj=clojure']
+
+command! DebugSyntax for id in synstack(line("."), col(".")) | echo synIDattr(id, "name") | endfor
+
+" }}}
+
+" Terminal {{{
+
+" terminal esc
+tnoremap <Esc> <C-\><C-n>
+
+" Settings aren't quite the same between vim and nvim
+function! SetupTerm()
+  setl modified  " this doesn't seem to work in nvim, but whatever
+  setl nonumber
+endfunction
+
+augroup term
+  autocmd!
+  if has('nvim')
+    autocmd TermOpen * call SetupTerm()
+  else
+    autocmd BufWinEnter * if &buftype == 'terminal' | call SetupTerm() | endif
+  endif
+augroup END
+
+" Open a hidden terminal, optionally running a command
+" Returns the buffer number
+function! HiddenTerm(...)
+  tabnew
+  if a:0 > 0
+    exe "terminal " . a:1
+  else
+    terminal
+  endif
+  setl bufhidden=hide
+  let bufnr = bufnr('%')
+  tabclose
+  return bufnr
+endfunction
+
+" }}}

@@ -1,0 +1,5 @@
+(ns clojure.pprint)
+(use 'joker.core)
+(load 'clojure.print-table)
+;; joker pprint already exists
+#_(intern 'clojure.pprint 'pprint joker.core/pprint)

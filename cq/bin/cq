@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+runner='clj-run-joke'
+cp=$(cd "$(dirname $(realpath "$0"))/../src" && pwd)
+
+args=("$@")
+if [[ ! -t 0 ]]; then
+  args+=('/dev/stdin')
+fi
+
+if [[ " $@ " =~ " --json " ]]; then
+  exec $runner -c "$cp" -m cq.core "$@" | jq .
+elif [[ " $@ " =~ " --csv " || " $@ " =~ " --raw-csv " ]]; then
+  runner='clj-run-cljs'   # joker is really slow on large csv files
+fi
+
+exec $runner -c "$cp" -m cq.core "${args[@]}"

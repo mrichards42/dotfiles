@@ -1,0 +1,83 @@
+#!/usr/bin/env joker
+;; Joker script runner
+;; Usage runner.joke [-c CLASSPATH] -m NAMESPACE[/MAIN_FUNCTION] [ARGS...]
+
+;; Hack joker's `lib-path__` function to:
+;; * read both .joke and .cljc files
+;; * use the ../lib as the standard path
+;; * allow adding paths to the classpath
+;; Hack joker's data-readers to include:
+;; * inst
+;; * uuid
+
+;;; Classpath
+(defn dirname [f] (second (re-find #"^(.*)/[^/]+$" f)))
+(def *realfile* (joker.string/trim (:out (joker.os/sh "realpath" *file*))))
+(def *dir* (dirname *realfile*))
+(def ^:dynamic *classpath* [(str (dirname *dir*) "/lib")])
+
+(defn- file-exists [n]
+  (try (joker.os/stat n)
+       true
+       (catch Error e nil)))
+
+(def extensions ["joke" "cljc"])
+
+(defn lib->paths [lib-name]
+  (let [filename (-> (name lib-name)
+                     (joker.string/replace "." "/")
+                     (joker.string/replace "-" "_"))]
+    (for [cp *classpath* ext extensions] (str cp "/" filename "." ext))))
+
+(defn find-lib [lib-name]
+  (->> (lib->paths lib-name)
+       (filter file-exists)
+       first))
+
+(defn lib-path [lib-name]
+  (if-let [path (find-lib lib-name)]
+    path
+    (throw (ex-info (str "Unable to find lib: " lib-name
+                         "; searched: " (joker.string/join ", " (lib->paths lib-name)))
+                    {:searched (lib->paths lib-name)}))))
+
+;;; Data readers
+(def data-readers
+  {'inst #'joker.core/identity
+   'uuid #'joker.core/identity})
+
+;;; Command line parsing
+(defn parse-main [main-fn]
+  (when-let [[ns main & rest-ns] (joker.string/split main-fn #"/")]
+    (when rest-ns
+      (throw (ex-info (str "No such namespace: " main-fn)
+             {:ns main-fn})))
+    {:ns ns, :main (or main "-main")}))
+
+(defn parse-classpath [cp]
+  {:classpath (joker.string/split cp #":")})
+
+(defn get-opts [args]
+  (loop [opts {}
+         [option value & rest-args :as args] args]
+    (if-let [opt (case option
+                   ("-c" "--classpath") (parse-classpath value)
+                   ("-m" "--main") (parse-main value)
+                   nil)]
+      (recur (merge opts opt) rest-args)
+      {:opts opts :args args})))
+
+;;; Main
+(defn -main [& args]
+  (let [{{:keys [ns main classpath]} :opts args :args} (get-opts args)]
+    (when ns
+      (binding [*classpath* (into *classpath* classpath)
+                *command-line-args* args]
+        (load (symbol ns))
+        (when-let [main-fn (resolve (symbol (str ns "/" main)))]
+          (apply main-fn *command-line-args*))))))
+
+(with-redefs [joker.core/lib-path__ lib-path
+              joker.core/default-data-readers (merge data-readers
+                                                     default-data-readers)]
+  (apply -main *command-line-args*))
