@@ -192,6 +192,10 @@ call plug#begin('~/.vim/plugged')
 
   " Helpful terminal interop
   Plug 'kassio/neoterm'
+
+  if filereadable(glob("~/.vim_plugins.local"))
+      source ~/.vim_plugins.local
+  endif
 call plug#end()
 
 " simple markdown tables
@@ -293,3 +297,7 @@ augroup term
 augroup END
 
 " }}}
+
+if filereadable(glob("~/.vimrc.local"))
+    source ~/.vimrc.local
+endif
