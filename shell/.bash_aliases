@@ -1,5 +1,7 @@
 if type nvim &> /dev/null; then alias vim=nvim; fi
 
+alias rm='rm -i'
+
 __bc() {
   echo "$@" | bc -l
 }
