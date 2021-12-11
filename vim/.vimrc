@@ -135,7 +135,9 @@ map <Leader>h :noh<CR>
 
 call plug#begin('~/.vim/plugged')
   " Language packs
+  let g:polyglot_disabled = ['markdown', 'pgsql']
   Plug 'sheerun/vim-polyglot'
+  Plug 'lifepillar/pgsql.vim' " More up to date than polyglot
 
   " Sensible defaults
   Plug 'tpope/vim-sensible'
@@ -254,9 +256,11 @@ augroup CursorLine
 augroup END
 
 " Markdown syntax additions
-let g:polyglot_disabled = ['markdown']
 let g:markdown_fenced_languages = ['clj=clojure', 'bash=sh', 'vim']
 " let g:vim_markdown_fenced_languages = ['clj=clojure']
+
+" Assume postgresql by default
+let g:sql_type_default = 'pgsql'
 
 command! DebugSyntax for id in synstack(line("."), col(".")) | echo synIDattr(id, "name") | endfor
 
