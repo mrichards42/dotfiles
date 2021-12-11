@@ -217,6 +217,12 @@ syntax on
 set t_Co=256
 set synmaxcol=300  " ignore long lines
 
+if exists('+termguicolors')
+  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 if filereadable(expand("~/.vimrc_background"))
   let base16colorspace=256
   source ~/.vimrc_background   " this is always a base16 colorscheme
