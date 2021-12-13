@@ -104,10 +104,10 @@ function! s:fzf_files(bang)
   else
     let cmd = "bash -c 'cat <(git ls-files --others --exclude-standard) <(git ls-files) | sort'"
   endif
-  return fzf#vim#files(dir || '', {'source': cmd}, a:bang)
+  return fzf#vim#files('', fzf#vim#with_preview({'source': cmd}), a:bang)
 endfunction
 
-command! -bang -nargs=0 -complete=dir Files call s:fzf_files(<bang>0)
+command! -bang -nargs=? -complete=dir Files call s:fzf_files(<bang>0)
 
 nmap <Leader>ff :Files<CR>
 nmap <Leader>fl :Lines<CR>
