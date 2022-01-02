@@ -75,17 +75,14 @@ set cursorline           " highlight the current line
 set colorcolumn=+1       " highlight the 80th column (textwidth + 1)
 set background=dark
 
-if filereadable(expand("~/.vimrc_background"))
-  let base16colorspace=256
-  colorscheme base16-tomorrow-night
-  source ~/.vimrc_background   " this is always a base16 colorscheme
-
-  " dimmer highlight colors
-  hi Search ctermfg=018 ctermbg=017
-  hi WildMenu ctermfg=018 ctermbg=017
-
-  " dimmer matching bracket
-  hi MatchParen ctermfg=16 ctermbg=241
-else
+try
+  let g:gruvbox_material_palette = "material"
+  let g:gruvbox_material_background = "hard"
+  let g:gruvbox_material_ui_contrast = "high"
+  let g:gruvbox_material_disable_italic_comment = 1
+  let g:gruvbox_material_enable_bold = 1
+  let g:gruvbox_material_better_performance = 1
+  colorscheme gruvbox-material
+catch
   colorscheme zenburn
-endif
+endtry
