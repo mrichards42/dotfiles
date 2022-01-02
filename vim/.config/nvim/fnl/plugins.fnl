@@ -54,6 +54,15 @@
       :cmd "TSHighlightCapturesUnderCursor"})
 
 
+;; -- telescope ---------------------------------------------------------------
+
+(use {1 "nvim-telescope/telescope.nvim"
+      :requires ["nvim-lua/plenary.nvim"
+                 {1 "nvim-telescope/telescope-fzf-native.nvim"
+                  :run "make"}]
+      :config #(_G.require! :config.telescope)})
+
+
 ;; -- colors ------------------------------------------------------------------
 
 ;; the current theme
