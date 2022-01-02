@@ -2,10 +2,31 @@
 " let &packpath = &runtimepath
 " source ~/.vimrc
 
-lua require('bootstrap-fennel')
-lua require('plugins')
+" -- Fennel -------------------------------------------------------------------
 
-command -nargs=+ Fnl :lua print(require('fennel').eval([[ <args> ]]))
+if has('nvim')
+  lua require('bootstrap-fennel')
+
+  " TODO: move this to init-fnl or something?
+
+  " Fennel and lua commands
+  command! -nargs=1 Fnl :lua require('fennel').eval([[ <args> ]])
+  command! -nargs=1 FnlPrint :lua print(require('fennel').eval([[ <args> ]]))
+  command! -nargs=1 FnlView :lua print(require('fennel').view(require('fennel').eval([[ <args> ]])))
+  command! -nargs=1 LuaPrint :lua print(<args>)
+  command! -nargs=1 LuaInspect :lua print(vim.inspect(<args>))
+
+  " Require (reload with !) a lua or fennel module
+  command! -bar -nargs=1 -bang Require Fnl (if (= :! <q-bang>) (_G.require! <q-args>) (require <q-args>))
+
+  " Based on https://github.com/wbthomason/dotfiles/blob/9134e87b00102cda07f875805f900775244067fe/neovim/.config/nvim/init.lua#L99-L103
+  command! PackerClean   Require! plugins | lua require('packer').clean()
+  command! PackerCompile Require! plugins | lua require('packer').compile()
+  command! PackerStatus  Require! plugins | lua require('packer').status()
+  command! PackerInstall Require! plugins | lua require('packer').install()
+  command! PackerSync    Require! plugins | lua require('packer').sync()
+  command! PackerUpdate  Require! plugins | lua require('packer').update()
+endif
 
 
 " -- Basics -------------------------------------------------------------------
