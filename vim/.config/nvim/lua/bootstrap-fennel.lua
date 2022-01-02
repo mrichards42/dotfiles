@@ -2,7 +2,7 @@
 local os = require('os')
 package.path = package.path .. ';' .. os.getenv('HOME') .. '/code/Fennel/?.lua'
 
--- TODO: alternativey, could have an autocommand run that compiles fennel to
+-- TODO: alternatively, could have an autocommand run that compiles fennel to
 -- lua on save
 
 local fennel = require("fennel")
@@ -14,8 +14,8 @@ local fennel = require("fennel")
 -- Here's a loader to do the same, but for fennel packages
 -- TODO: might need to add something like this for macros
 table.insert(package.loaders or package.searchers, function(name)
-	-- Based on https://github.com/neovim/neovim/blob/f5fb79733e30b6444e9637e9a1aa4bfcb2050ab5/src/nvim/lua/vim.lua#L57
-	local basename = name:gsub('%.', '/')
+  -- Based on https://github.com/neovim/neovim/blob/f5fb79733e30b6444e9637e9a1aa4bfcb2050ab5/src/nvim/lua/vim.lua#L57
+  local basename = name:gsub('%.', '/')
   local paths = {"fnl/"..basename..".fnl", "fnl/"..basename.."/init.fnl"}
   local found = vim.api.nvim__get_runtime(paths, false, {})
   if #found > 0 then
@@ -25,6 +25,11 @@ table.insert(package.loaders or package.searchers, function(name)
   end
 end)
 
--- reload init-fnl
-package.loaded['init-fnl'] = nil
-require('init-fnl')
+-- 
+function _G.require_bang(name)
+  package.loaded[name] = nil
+  return require(name)
+end
+
+-- For fennel, `require!` is a bit more lispy
+_G['require!'] = _G['require_bang']
