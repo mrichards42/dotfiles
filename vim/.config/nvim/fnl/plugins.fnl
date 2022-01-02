@@ -54,6 +54,14 @@
       :cmd "TSHighlightCapturesUnderCursor"})
 
 
+;; -- lsp ---------------------------------------------------------------------
+
+(use {1 "neovim/nvim-lspconfig"
+      :requires ["jose-elias-alvarez/null-ls.nvim"
+                 "nvim-lua/plenary.nvim"]
+      :config #(_G.require! :config.lsp)})
+
+
 ;; -- telescope ---------------------------------------------------------------
 
 (use {1 "nvim-telescope/telescope.nvim"
