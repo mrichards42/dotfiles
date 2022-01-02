@@ -1,7 +1,3 @@
--- Just bootstrapping fennel :)
-local os = require('os')
-package.path = package.path .. ';' .. os.getenv('HOME') .. '/code/Fennel/?.lua'
-
 -- TODO: alternatively, could have an autocommand run that compiles fennel to
 -- lua on save
 
