@@ -1,5 +1,5 @@
 {:user {:plugins [[cider/cider-nrepl "0.21.1"]
-                  [venantius/ultra "0.6.0"]]
+                  #_[venantius/ultra "0.6.0"]]
         :dependencies [[com.cemerick/pomegranate "1.0.0"]]
         ;; Instead of adding a bunch of plugins, use aliases for each one
         :aliases {"kibit" ["with-profile" "+user-kibit" "kibit"]
