@@ -10,9 +10,9 @@ if has('nvim')
   " TODO: move this to init-fnl or something?
 
   " Fennel and lua commands
-  command! -nargs=1 Fnl :lua require('fennel').eval([[ <args> ]])
-  command! -nargs=1 FnlPrint :lua print(require('fennel').eval([[ <args> ]]))
-  command! -nargs=1 FnlView :lua print(require('fennel').view(require('fennel').eval([[ <args> ]])))
+  command! -nargs=1 Fnl :lua require('fennel').eval([=====[ <args> ]=====])
+  command! -nargs=1 FnlPrint :lua print(require('fennel').eval([=====[ <args> ]=====]))
+  command! -nargs=1 FnlView :lua _G.fennel_pprint(require('fennel').eval([=====[ <args> ]=====]))
   command! -nargs=1 LuaPrint :lua print(<args>)
   command! -nargs=1 LuaInspect :lua print(vim.inspect(<args>))
 

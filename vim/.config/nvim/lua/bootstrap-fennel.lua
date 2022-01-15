@@ -21,7 +21,15 @@ table.insert(package.loaders or package.searchers, function(name)
   end
 end)
 
--- 
+function _G.fennel_pprint(...)
+  local t = {}
+  for i = 1, select("#", ...) do
+    local x = select(i, ...)
+    t[i] = fennel.view(x)
+  end
+  print(unpack(t))
+end
+
 function _G.require_bang(name)
   package.loaded[name] = nil
   return require(name)
