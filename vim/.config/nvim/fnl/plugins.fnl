@@ -19,12 +19,7 @@
 (use "tpope/vim-rsi")         ; readline keys in insert mode
 (use "tpope/vim-surround")    ; paren mappings
 (use {1 "tpope/vim-sexp-mappings-for-regular-people"
-      :requires {1 "guns/vim-sexp" :opt true}
-      ;; TODO: use the insert mode mappings I created the old version of the
-      ;; clojure dotfiles
-      ;; defaults plus fennel
-      :setup #(set vim.g.sexp_filetypes "lisp,scheme,clojure,fennel")
-      :ft ["lisp" "scheme" "clojure" "fennel"]})
+      :requires ["guns/vim-sexp"]})
 
 
 ;; -- git ---------------------------------------------------------------------
