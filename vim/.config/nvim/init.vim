@@ -77,7 +77,11 @@ set background=dark
 
 try
   let g:gruvbox_material_palette = "material"
-  let g:gruvbox_material_background = "hard"
+  if has('mac')
+    let g:gruvbox_material_background = "medium"
+  else
+    let g:gruvbox_material_background = "hard"
+  endif
   let g:gruvbox_material_ui_contrast = "high"
   let g:gruvbox_material_disable_italic_comment = 1
   let g:gruvbox_material_enable_bold = 1
