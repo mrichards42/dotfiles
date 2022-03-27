@@ -104,3 +104,5 @@
 
 (use {1 "tpope/vim-dadbod"
       :cmd "DB"}) ;; db
+
+(use "godlygeek/tabular")
