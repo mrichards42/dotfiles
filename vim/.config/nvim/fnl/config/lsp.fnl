@@ -93,3 +93,4 @@
                   ;; the rest
                   (attach-std client bufnr))}))
 
+(nvim-lsp.dockerls.setup std-cfg)
