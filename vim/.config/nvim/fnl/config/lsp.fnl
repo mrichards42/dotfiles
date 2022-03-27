@@ -1,6 +1,13 @@
 (local null-ls (require :null-ls))
 (local sqlfluff (_G.require! :null_ls_sqlfluff))
 (local nvim-lsp (require :lspconfig))
+(local ts-utils (require :nvim-lsp-ts-utils))
+
+(fn merge [a b]
+  (let [ret {}]
+    (collect [k v (pairs a) :into ret] (values k v))
+    (collect [k v (pairs b) :into ret] (values k v))
+    ret))
 
 ;; Turn off the distracting linting indicators
 (vim.diagnostic.config
@@ -32,7 +39,7 @@
 
 ;; Configure lsp clients
 
-(fn on-attach [client bufnr]
+(fn attach-std [client bufnr]
   ;; omnifunc
   (vim.api.nvim_buf_set_option bufnr :omnifunc  "v:lua.vim.lsp.omnifunc")
 
@@ -44,17 +51,16 @@
                          :<C-k> "vim.lsp.buf.signature_help()"
                          :gi "vim.lsp.buf.implementation()"
                          :gr "vim.lsp.buf.references()"
-                         :gr "vim.lsp.buf.references()"
                          "[d" "vim.diagnostic.goto_prev()"
                          "]d" "vim.diagnostic.goto_next()"
                          ;; all the leader keys from lspconfig, but prefixed
                          ;; with "l" for "lsp"
                          "<leader>ld" "vim.lsp.buf.type_definition()"
-                         "<leader>lrn" "vim.lsp.buf.rename()"
+                         "<leader>lr" "vim.lsp.buf.rename()"
                          "<leader>lca" "vim.lsp.buf.code_action()"
                          "<leader>le" "vim.diagnostic.open_float()"
                          "<leader>lq" "vim.diagnostic.setloclist()"
-                         "<leader>lf" "vim.buf.formatting()"})]
+                         "<leader>lf" "vim.lsp.buf.formatting()"})]
     (vim.api.nvim_buf_set_keymap bufnr :n
                                  key
                                  (.. "<cmd>lua " cmd "<cr>")
@@ -62,13 +68,28 @@
 
 (null-ls.setup
  {:sources [(null-ls.builtins.diagnostics.shellcheck.with
-              {:filetypes [:sh :bash :zsh]})
+             {:filetypes [:sh :bash :zsh]})
+            (null-ls.builtins.formatting.prettier.with
+             {:prefer_local "node_modules/.bin"})
             sqlfluff]
   :diagnostics_format "[#{c}] #{m} (#{s})"
-  :on_attach on-attach})
+  :on_attach attach-std})
 
+(local std-cfg
+  {:on_attach attach-std
+   :flags {:debounce_text_changes 150}})
 
-(each [_ lsp (ipairs [:tsserver])]
-  ((. nvim-lsp lsp :setup)
-   {:on_attach on-attach
-    :flags {:debounce_text_changes 150}}))
+(nvim-lsp.tsserver.setup
+  (merge
+    std-cfg
+    {:init_options ts-utils.init_options
+     :on_attach (fn [client bufnr]
+                  ;; ts-utils
+                  (ts-utils.setup {:auto_inlay_hints false})
+                  (ts-utils.setup_client client)
+                  ;; hack tsserver to tell it not to do formatting (use null-ls w/ prettier)
+                  (set client.resolved_capabilities.document_formatting false)
+                  (set client.resolved_capabilities.document_range_formatting false)
+                  ;; the rest
+                  (attach-std client bufnr))}))
+

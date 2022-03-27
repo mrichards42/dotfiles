@@ -90,6 +90,16 @@
       :cmd "Colortuner"})
 
 
+;; -- language specific -------------------------------------------------------
+
+;; js/ts
+
+(use "JoosepAlviste/nvim-ts-context-commentstring")
+
+(use {1 "jose-elias-alvarez/nvim-lsp-ts-utils"
+      :requires ["nvim-lua/plenary.nvim"]})
+
+
 ;; -- misc --------------------------------------------------------------------
 
 (use {1 "tpope/vim-dadbod"

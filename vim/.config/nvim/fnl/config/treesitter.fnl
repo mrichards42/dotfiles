@@ -7,4 +7,6 @@
    ;; treesitter highlighting is weird for lisps
    :disable [:fennel :clojure]
    ;; for spell checking
-   :additional_vim_regex_highlighting true}})
+   :additional_vim_regex_highlighting true}
+  ;; requires nvim-ts-context-commentstring
+  :context_commentstring {:enable true}})
