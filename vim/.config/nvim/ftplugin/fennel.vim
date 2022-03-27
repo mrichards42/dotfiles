@@ -1,3 +1,11 @@
+" Indentation
+let g:fennel_align_subforms = 1
+let g:fennel_fuzzy_indent_patterns = [
+      \ '^def', '^let', '^while', '^with', '^if', '^fn$', '^var$',
+      \ '^case$', '^for$', '^each', '^local$', '^global$', '^match',
+      \ '^macro', '^lambda$', '^collect', '^icollect', '^accumulate', '^ns$',
+      \ '^comment$']
+
 " Evaluation stuff
 function s:evalop(type) abort
   " echo selection#gettext(a:type).code
