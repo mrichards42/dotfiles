@@ -90,3 +90,16 @@ try
 catch
   colorscheme zenburn
 endtry
+
+
+" -- Remap some common mistakes -----------------------------------------------
+
+" I never use the command line window
+nmap q: :q
+nmap Q: :q
+
+" Typos for :q and :qa
+cnoreabbrev Q q
+cnoreabbrev qA qa
+cnoreabbrev QA qa
+cnoreabbrev Qa qa
