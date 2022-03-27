@@ -75,10 +75,6 @@
 (use "chriskempson/base16-vim")
 
 ;; a few additional reasonable themes
-(use {1 "EdenEast/nightfox.nvim"
-      :config #((. (require :nightfox) :setup)
-                {:fox :duskfox
-                 :styles {:keywords :bold}})})
 
 (use {1 "mcchrish/zenbones.nvim"
       :requires "rktjmp/lush.nvim"})
