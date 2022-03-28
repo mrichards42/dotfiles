@@ -54,6 +54,9 @@ set number               " line numbers
 set spell                " spellchecking, generally just in comments / strings
 set splitright           " prefer right splits instead of left (for :vsplit)
 
+" linewise jk
+nnoremap k gk
+nnoremap j gj
 
 " -- Search -------------------------------------------------------------------
 
