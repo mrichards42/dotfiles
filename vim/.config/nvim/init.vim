@@ -79,7 +79,7 @@ set colorcolumn=+1       " highlight the 80th column (textwidth + 1)
 set background=dark
 
 try
-  let g:gruvbox_material_palette = "material"
+  let g:gruvbox_material_foreground = "material"
   if has('mac')
     let g:gruvbox_material_background = "medium"
   else
