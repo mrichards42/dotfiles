@@ -1,6 +1,36 @@
 (local treesitter-configs (require "nvim-treesitter.configs"))
 (treesitter-configs.setup
- {:ensure_installed "maintained" ; one of "all", "maintained" (parsers with maintainers), or a list of languages
+ {:ensure_installed [:bash
+                     :clojure
+                     :cpp
+                     :css
+                     :dockerfile
+                     :dot
+                     :fennel
+                     :go
+                     :javascript
+                     :help
+                     :hcl
+                     :html
+                     :jsdoc
+                     :json
+                     :lua
+                     :make
+                     :markdown
+                     :perl
+                     :prisma
+                     :python
+                     :r
+                     :regex
+                     :rst
+                     :ruby
+                     :rust
+                     :scss
+                     :toml
+                     :tsx
+                     :typescript
+                     :vim
+                     :yaml]
   :sync_install false ; install languages synchronously (only applied to `ensure_installed`)
   :highlight
   {:enable true
