@@ -30,3 +30,11 @@ fi
 if [[ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ]]; then
   . "$HOME/.asdf/plugins/java/set-java-home.zsh"
 fi
+
+# -- less ---------------------------------------------------------------------
+
+LESS='-iSRFXMx4'
+
+# -- aws ----------------------------------------------------------------------
+
+SAM_CLI_TELEMETRY=0
