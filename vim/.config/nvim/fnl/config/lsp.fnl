@@ -1,5 +1,5 @@
 (local null-ls (require :null-ls))
-(local sqlfluff (_G.require! :null_ls_sqlfluff))
+; (local sqlfluff (_G.require! :null_ls_sqlfluff))
 (local nvim-lsp (require :lspconfig))
 (local ts-utils (require :nvim-lsp-ts-utils))
 
@@ -37,7 +37,7 @@
 
 (vim.cmd "autocmd CursorHold * lua PrintDiagnostics()")
 
-;; Configure lsp clients
+;; -- Configure lsp clients --
 
 (fn attach-std [client bufnr]
   ;; omnifunc
@@ -45,33 +45,32 @@
 
   ;; buffer-local key maps
   (each [key cmd (pairs {;; the standard set of keys in lspconfig
-                         :gD "vim.lsp.buf.declaration()"
-                         :gd "vim.lsp.buf.definition()"
-                         :K "vim.lsp.buf.hover()"
-                         :<C-k> "vim.lsp.buf.signature_help()"
-                         :gi "vim.lsp.buf.implementation()"
-                         :gr "vim.lsp.buf.references()"
-                         "[d" "vim.diagnostic.goto_prev()"
-                         "]d" "vim.diagnostic.goto_next()"
+                         :gD vim.lsp.buf.declaration
+                         :gd vim.lsp.buf.definition
+                         :K vim.lsp.buf.hover
+                         :<C-k> vim.lsp.buf.signature_help
+                         :gi vim.lsp.buf.implementation
+                         :gr vim.lsp.buf.references
+                         "[d" vim.diagnostic.goto_prev
+                         "]d" vim.diagnostic.goto_next
                          ;; all the leader keys from lspconfig, but prefixed
                          ;; with "l" for "lsp"
-                         "<leader>ld" "vim.lsp.buf.type_definition()"
-                         "<leader>lr" "vim.lsp.buf.rename()"
-                         "<leader>lca" "vim.lsp.buf.code_action()"
-                         "<leader>le" "vim.diagnostic.open_float()"
-                         "<leader>lq" "vim.diagnostic.setloclist()"
-                         "<leader>lf" "vim.lsp.buf.formatting()"})]
-    (vim.api.nvim_buf_set_keymap bufnr :n
-                                 key
-                                 (.. "<cmd>lua " cmd "<cr>")
-                                 {:noremap true :silent true})))
+                         "<leader>ld" vim.lsp.buf.type_definition
+                         "<leader>lr" vim.lsp.buf.rename
+                         "<leader>lca" vim.lsp.buf.code_action
+                         "<leader>le" vim.diagnostic.open_float
+                         "<leader>lq" vim.diagnostic.setloclist
+                         "<leader>lf" #(vim.lsp.buf.format {:async true})})]
+    (vim.keymap.set :n key cmd {:noremap true :silent true :buffer bufnr})))
 
 (null-ls.setup
  {:sources [(null-ls.builtins.diagnostics.shellcheck.with
              {:filetypes [:sh :bash :zsh]})
             (null-ls.builtins.formatting.prettier.with
-             {:prefer_local "node_modules/.bin"})
-            sqlfluff]
+             {:only_local "node_modules/.bin"})
+            (null-ls.builtins.diagnostics.sqlfluff.with
+             {:extra_args {:--dialect "postgres"}})
+            null-ls.builtins.diagnostics.eslint_d]
   :diagnostics_format "[#{c}] #{m} (#{s})"
   :on_attach attach-std})
 
@@ -88,8 +87,7 @@
                   (ts-utils.setup {:auto_inlay_hints false})
                   (ts-utils.setup_client client)
                   ;; hack tsserver to tell it not to do formatting (use null-ls w/ prettier)
-                  (set client.resolved_capabilities.document_formatting false)
-                  (set client.resolved_capabilities.document_range_formatting false)
+                  (set client.server_capabilities.documentFormattingProvider false)
                   ;; the rest
                   (attach-std client bufnr))}))
 
