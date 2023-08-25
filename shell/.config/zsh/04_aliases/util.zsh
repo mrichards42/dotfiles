@@ -24,3 +24,8 @@ alias find='noglob find'
 
 alias ag='ag --no-number'
 alias rg='rg --no-line-number'
+
+## -- dos2unix ----------------------------------------------------------------
+
+alias dos2unix='perl -i -p -e "s|\r\n$|\n|g"'
+alias unix2dos='perl -i -p -e "s|[\r\n]+$|\r\n|g"'
