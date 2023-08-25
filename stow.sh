@@ -10,25 +10,32 @@ if [[ "$1" = "--all" ]]; then
     -maxdepth 1 \
     ! -name '.*' \
     ! -name 'stow' \
+    ! -name 'mac-*' \
+    ! -name 'linux-*' \
     -exec basename {} ';'
   ) )
-  # Test and execute, if successful
-  echo '###########'
-  echo '# Testing #'
-  echo '###########'
-  echo "# stow -nv ${PKGS[@]}"
-  if $STOW -nv "${PKGS[@]}"; then
-    echo 'No conflicts detected'
-    echo
-    echo '###########'
-    echo '# Running #'
-    echo '###########'
-    echo "# stow -vv ${PKGS[@]}"
-    $STOW -vv "${PKGS[@]}"
+  if [[ -n "$2" ]]; then
+    exec $STOW -vv "${PKGS[@]}" "${@:2}"
   else
-    echo
-    echo "!! Errors detected !!"
-    echo "Please remove existing files, or stow individual packages."
+    # Test and execute, if successful
+    echo '###########'
+    echo '# Testing #'
+    echo '###########'
+    echo "# stow -nv ${PKGS[@]}"
+    if $STOW -nv "${PKGS[@]}"; then
+      echo 'No conflicts detected'
+      echo
+      echo '###########'
+      echo '# Running #'
+      echo '###########'
+      echo "# stow -vv ${PKGS[@]}"
+      echo "# stow -vv ${PKGS[@]} ${@:2}"
+      exec $STOW -vv "${PKGS[@]}" "${@:2}"
+    else
+      echo
+      echo "!! Errors detected !!"
+      echo "Please remove existing files, or stow individual packages."
+    fi
   fi
 else
   exec $STOW -vv "$@"
