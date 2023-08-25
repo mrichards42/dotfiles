@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Very minimal sql formatter
+
+perl -0777 -p -e '
+  use experimental qw(vlb);
+  # keywords, newline before
+  s/
+    (?<!\n\s{0,20})
+    \b
+    ( select
+    | from
+    | inner\ join
+    | cross\ join
+    | left\ join
+    | full\ outer\ join
+    | outer\ join
+    | join
+    | where
+    | order\ by
+    | group\ by
+    | partition\ by
+    | and
+    | or
+    )
+    \b/\n$1/gix;
+  # keywords, newline after
+  s/
+    \b
+    ( select
+    )
+    \s*
+    \b
+    (?!\n)
+    /$1\n/gix;
+  # commas
+  s/,\s*/,\n/g;
+' "$@"

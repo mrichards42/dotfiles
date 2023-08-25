@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+# Pads with = characters until length is a multiple of 4
+base64-pad() {
+    local len=${#1};
+    local width=$(( (len + 3) / 4 * 4 )) # round up to nearest multiple of 4
+    printf "%-${width}s" "$1" | sed 's/ /=/g'
+}
+
+color() {
+    if [[ "$1" = "off" ]]; then
+        printf '\e[0m';
+    elif [[ -n "$1" ]]; then
+        printf '\e[%sm' "$1";
+    fi
+}
+
+if [[ -t 0 ]]; then
+    IFS='.' read -r -a parts <<< "$1"
+else
+    IFS='.' read -r -a parts
+fi
+
+iat=$(base64-pad "${parts[1]}" | base64 -D | jq .iat)
+exp=$(base64-pad "${parts[1]}" | base64 -D | jq .exp)
+now=$(date '+%s')
+
+color 33; echo '--alg--'; color off
+base64-pad "${parts[0]}" | base64 -D | jq
+
+color 33; echo '--payload--'; color off
+base64-pad "${parts[1]}" | base64 -D | jq
+
+color 33; echo '--signature--'; color off
+echo "${parts[2]}"
+
+color 33; echo '--timestamps--'; color off
+if [[ -n "$iat" ]]; then
+    printf '  Issued:  %s (%s minutes ago -- %s)\n' "$iat" $(( (now - iat) / 60 )) "$(date -j -f '%s' "$iat")"
+fi
+if [[ -n "$exp" ]]; then
+    if (( exp > now )); then
+        color 32
+        printf '✓ Expires: %s (%s minutes from now -- %s)\n' "$exp" $(( (exp - now) / 60 )) "$(date -j -f '%s' "$exp")"
+        color off
+    else
+        color 31
+        printf '✘ Expired: %s (%s minutes ago -- %s)\n' "$exp" $(( (now - exp) / 60 )) "$(date -j -f '%s' "$exp")"
+        color off
+    fi
+fi
