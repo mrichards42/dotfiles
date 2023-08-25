@@ -19,18 +19,6 @@ if [[ -n "$HOMEBREW_REPOSITORY" ]]; then
   export PATH="/usr/local/opt/curl/bin:$PATH"
 fi
 
-
-# -- asdf ---------------------------------------------------------------------
-
-if [[ -f "$HOME/.asdf/asdf.sh" ]]; then
-  . $HOME/.asdf/asdf.sh
-  fpath=(${ASDF_DIR}/completions $fpath)
-fi
-
-if [[ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ]]; then
-  . "$HOME/.asdf/plugins/java/set-java-home.zsh"
-fi
-
 # -- less ---------------------------------------------------------------------
 
 LESS='-iSRFXMx4'
@@ -38,3 +26,9 @@ LESS='-iSRFXMx4'
 # -- aws ----------------------------------------------------------------------
 
 SAM_CLI_TELEMETRY=0
+
+# -- rtx ----------------------------------------------------------------------
+
+if [[ -z "$RTX_SHELL" ]] && command -v rtx &> /dev/null; then
+  source <(rtx activate zsh)
+fi
