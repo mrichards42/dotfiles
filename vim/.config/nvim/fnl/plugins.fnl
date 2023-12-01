@@ -18,6 +18,7 @@
 (use "tpope/vim-repeat")      ; used by multiple plugins for "." repeating
 (use "tpope/vim-rsi")         ; readline keys in insert mode
 (use "tpope/vim-surround")    ; paren mappings
+(use "tpope/vim-abolish")     ; case-preserving replacements
 (use {1 "tpope/vim-sexp-mappings-for-regular-people"
       :requires ["guns/vim-sexp"]})
 
