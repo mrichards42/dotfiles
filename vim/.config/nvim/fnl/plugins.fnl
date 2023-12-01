@@ -94,18 +94,18 @@
       :cmd "Colortuner"})
 
 
-;; -- language specific -------------------------------------------------------
+;; -- js/ts -------------------------------------------------------------------
 
-;; js/ts
-
-
-(use {1 "jose-elias-alvarez/nvim-lsp-ts-utils"
-      :requires ["nvim-lua/plenary.nvim"]})
+(use {1 "pmizio/typescript-tools.nvim"
+      :requires ["nvim-lua/plenary.nvim"
+                 "neovim/nvim-lspconfig"]})
 
 
-;; -- misc --------------------------------------------------------------------
+;; -- db ----------------------------------------------------------------------
 
 (use {1 "tpope/vim-dadbod"
       :cmd "DB"}) ;; db
+
+;; -- misc --------------------------------------------------------------------
 
 (use "godlygeek/tabular")

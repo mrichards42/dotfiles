@@ -1,7 +1,7 @@
 (local null-ls (require :null-ls))
 ; (local sqlfluff (_G.require! :null_ls_sqlfluff))
 (local nvim-lsp (require :lspconfig))
-(local ts-utils (require :nvim-lsp-ts-utils))
+(local typescript-tools (require :typescript-tools))
 
 (fn merge [a b]
   (let [ret {}]
@@ -78,16 +78,13 @@
   {:on_attach attach-std
    :flags {:debounce_text_changes 150}})
 
-(nvim-lsp.tsserver.setup
+(typescript-tools.setup
   (merge
     std-cfg
-    {:init_options ts-utils.init_options
-     :on_attach (fn [client bufnr]
-                  ;; ts-utils
-                  (ts-utils.setup {:auto_inlay_hints false})
-                  (ts-utils.setup_client client)
-                  ;; hack tsserver to tell it not to do formatting (use null-ls w/ prettier)
+    {:on_attach (fn [client bufnr]
+                  ;; hack typescript-tools to tell it not to do formatting (use null-ls w/ prettier)
                   (set client.server_capabilities.documentFormattingProvider false)
+                  (set client.server_capabilities.documentRangeFormattingProvider false)
                   ;; the rest
                   (attach-std client bufnr))}))
 
