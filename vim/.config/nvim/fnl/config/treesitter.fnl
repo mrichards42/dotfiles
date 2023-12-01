@@ -1,4 +1,8 @@
-(local treesitter-configs (require "nvim-treesitter.configs"))
+(local treesitter-configs (require :nvim-treesitter.configs))
+(local treesitter-install (require :nvim-treesitter.install))
+
+(set treesitter-install.prefer_git true)
+
 (treesitter-configs.setup
  {:ensure_installed [:bash
                      :clojure
@@ -6,10 +10,11 @@
                      :css
                      :dockerfile
                      :dot
+                     :elixir
+                     :erlang
                      :fennel
                      :go
                      :javascript
-                     :help
                      :hcl
                      :html
                      :jsdoc
@@ -26,10 +31,12 @@
                      :ruby
                      :rust
                      :scss
+                     :sql
                      :toml
                      :tsx
                      :typescript
                      :vim
+                     :vimdoc
                      :yaml]
   :sync_install false ; install languages synchronously (only applied to `ensure_installed`)
   :highlight
