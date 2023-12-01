@@ -60,6 +60,19 @@
                  "nvim-lua/plenary.nvim"]
       :config #(_G.require! :config.lsp)})
 
+;; -- completion --------------------------------------------------------------
+
+(use {1 "hrsh7th/cmp-nvim-lsp"
+      :requires ["hrsh7th/cmp-buffer"
+                 "hrsh7th/cmp-path"
+                 "hrsh7th/cmp-cmdline"
+                 "hrsh7th/nvim-cmp"
+                 "hrsh7th/vim-vsnip"
+                 "hrsh7th/cmp-vsnip"
+                 {1 "tzachar/cmp-fuzzy-path"
+                  :requires ["tzachar/fuzzy.nvim"]}]
+      :config #(_G.require! :config.cmp)})
+
 
 ;; -- telescope ---------------------------------------------------------------
 
@@ -105,6 +118,8 @@
 
 (use {1 "tpope/vim-dadbod"
       :cmd "DB"}) ;; db
+
+(use "kristijanhusak/vim-dadbod-completion")
 
 ;; -- misc --------------------------------------------------------------------
 

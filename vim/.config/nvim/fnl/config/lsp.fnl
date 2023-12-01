@@ -2,6 +2,7 @@
 ; (local sqlfluff (_G.require! :null_ls_sqlfluff))
 (local nvim-lsp (require :lspconfig))
 (local typescript-tools (require :typescript-tools))
+(local cmp-nvim-lsp (require :cmp_nvim_lsp))
 
 (fn merge [a b]
   (let [ret {}]
@@ -76,7 +77,9 @@
 
 (local std-cfg
   {:on_attach attach-std
-   :flags {:debounce_text_changes 150}})
+   :flags {:debounce_text_changes 150}
+   ;; nvim-cmp integration
+   :capabilities (cmp-nvim-lsp.default_capabilities)})
 
 (typescript-tools.setup
   (merge
