@@ -46,6 +46,9 @@
       :run ":TSUpdate"
       :config #(_G.require! :config.treesitter)})
 
+(use {1 "JoosepAlviste/nvim-ts-context-commentstring"
+      :config #(set vim.g.skip_ts_context_commentstring_module true)})
+
 (use {1 "nvim-treesitter/playground"
       :cmd "TSHighlightCapturesUnderCursor"})
 
@@ -95,7 +98,6 @@
 
 ;; js/ts
 
-(use "JoosepAlviste/nvim-ts-context-commentstring")
 
 (use {1 "jose-elias-alvarez/nvim-lsp-ts-utils"
       :requires ["nvim-lua/plenary.nvim"]})
