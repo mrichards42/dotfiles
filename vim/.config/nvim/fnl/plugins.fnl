@@ -114,6 +114,11 @@
                  "neovim/nvim-lspconfig"]})
 
 
+;; -- clojure -----------------------------------------------------------------
+
+(use "Olical/conjure")
+(use "PaterJason/cmp-conjure")
+
 ;; -- db ----------------------------------------------------------------------
 
 (use {1 "tpope/vim-dadbod"

@@ -71,7 +71,10 @@
              {:only_local "node_modules/.bin"})
             (null-ls.builtins.diagnostics.sqlfluff.with
              {:extra_args {:--dialect "postgres"}})
-            null-ls.builtins.diagnostics.eslint_d]
+            null-ls.builtins.diagnostics.eslint_d
+            (null-ls.builtins.formatting.cljstyle.with
+             {:command "cljfmt"
+              :args ["fix" "-q" "-"]})]
   :diagnostics_format "[#{c}] #{m} (#{s})"
   :on_attach attach-std})
 

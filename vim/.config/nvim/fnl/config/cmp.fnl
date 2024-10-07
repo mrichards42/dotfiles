@@ -6,6 +6,7 @@
  {:snippet {:expand #((. vim.fn :vsnip#anonymous) $.body)}
   :sources (cmp.config.sources
             [{:name "nvim_lsp"}
+             {:name "conjure"}
              {:name "buffer"}
              {:name "path"}])
   :mapping (cmp.mapping.preset.insert
