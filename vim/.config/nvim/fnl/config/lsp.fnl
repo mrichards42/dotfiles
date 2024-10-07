@@ -44,25 +44,30 @@
   ;; omnifunc
   (vim.api.nvim_buf_set_option bufnr :omnifunc  "v:lua.vim.lsp.omnifunc")
 
-  ;; buffer-local key maps
-  (each [key cmd (pairs {;; the standard set of keys in lspconfig
-                         :gD vim.lsp.buf.declaration
-                         :gd vim.lsp.buf.definition
-                         :K vim.lsp.buf.hover
-                         :<C-k> vim.lsp.buf.signature_help
-                         :gi vim.lsp.buf.implementation
-                         :gr vim.lsp.buf.references
-                         "[d" vim.diagnostic.goto_prev
-                         "]d" vim.diagnostic.goto_next
-                         ;; all the leader keys from lspconfig, but prefixed
-                         ;; with "l" for "lsp"
-                         "<leader>ld" vim.lsp.buf.type_definition
-                         "<leader>lr" vim.lsp.buf.rename
-                         "<leader>lca" vim.lsp.buf.code_action
-                         "<leader>le" vim.diagnostic.open_float
-                         "<leader>lq" vim.diagnostic.setloclist
-                         "<leader>lf" #(vim.lsp.buf.format {:async true})})]
-    (vim.keymap.set :n key cmd {:noremap true :silent true :buffer bufnr})))
+  (let [existing-keys (collect [_ m (ipairs (vim.api.nvim_buf_get_keymap 0 :n))]
+                        (values m.lhs m.lhs))
+        has-mapping? (fn [key]
+                       (. existing-keys (key:gsub "<leader>" vim.g.mapleader)))]
+    ;; buffer-local key maps
+    (each [key cmd (pairs {;; the standard set of keys in lspconfig
+                           :gD vim.lsp.buf.declaration
+                           :gd vim.lsp.buf.definition
+                           :K vim.lsp.buf.hover
+                           :<C-k> vim.lsp.buf.signature_help
+                           :gi vim.lsp.buf.implementation
+                           :gr vim.lsp.buf.references
+                           "[d" vim.diagnostic.goto_prev
+                           "]d" vim.diagnostic.goto_next
+                           ;; all the leader keys from lspconfig, but prefixed
+                           ;; with "l" for "lsp"
+                           "<leader>ld" vim.lsp.buf.type_definition
+                           "<leader>lr" vim.lsp.buf.rename
+                           "<leader>lca" vim.lsp.buf.code_action
+                           "<leader>le" vim.diagnostic.open_float
+                           "<leader>lq" vim.diagnostic.setloclist
+                           "<leader>lf" #(vim.lsp.buf.format {:async true})})]
+      (when (not (has-mapping? key))
+        (vim.keymap.set :n key cmd {:noremap true :silent true :buffer bufnr})))))
 
 (null-ls.setup
  {:sources [(null-ls.builtins.diagnostics.shellcheck.with
