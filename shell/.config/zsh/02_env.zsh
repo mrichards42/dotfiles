@@ -27,8 +27,8 @@ LESS='-iSRFXMx4'
 
 SAM_CLI_TELEMETRY=0
 
-# -- rtx ----------------------------------------------------------------------
+# -- mise ---------------------------------------------------------------------
 
-if [[ -z "$RTX_SHELL" ]] && command -v rtx &> /dev/null; then
-  source <(rtx activate zsh)
+if [[ -z "$MISE_SHELL" ]] && command -v mise &> /dev/null; then
+  eval "$(mise activate zsh)"
 fi
