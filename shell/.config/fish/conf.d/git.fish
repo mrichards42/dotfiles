@@ -1,0 +1,8 @@
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gco='git checkout'
+alias gci='git commit'
+alias gca='git commit --amend'
+alias gap='git add -p'
+alias gpo='git push origin'
+alias gs='git status'
