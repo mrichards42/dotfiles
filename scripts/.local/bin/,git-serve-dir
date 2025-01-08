@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+base_path="$(dirname "$PWD")"
+git_dir="$PWD/.git"
+repo_name="$(basename "$PWD")"
+
+if [[ ! -d "$git_dir" ]]; then
+  >&2 echo "$git_dir is not a git directory"
+  exit 1
+fi
+
+addr=$(ifconfig | grep -E -o 'inet 192\S+' | cut -c 6-)
+
+echo "Starting a git server for the current directory
+
+On another computer, you can run this to fetch branches from this repo
+
+    git remote add <name> git://$addr/$repo_name
+    git fetch <name>
+"
+
+git daemon --base-path="$base_path" --export-all "$git_dir"
