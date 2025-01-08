@@ -12,7 +12,7 @@
   ca = commit --amend
   st = status
   dc = diff --cached
-  tree = log --graph --oneline --decorate
+  tree = log --graph --decorate --format='%C(auto)%h %C(blue)%cs%C(auto)%d %s'
   # Idea from https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
   fzf = !git tree --color=always --branches \
     | fzf --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
