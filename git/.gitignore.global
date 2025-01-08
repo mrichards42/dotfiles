@@ -2,3 +2,6 @@
 .DS_Store
 .tool-versions
 */types/global.ts
+.ignore
+.venv
+venv
