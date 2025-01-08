@@ -23,7 +23,7 @@ or another package manager.
 Install homebrew, then
 
 ```bash
-brew bundle install Brewfile
+brew bundle install --file ./Brewfile
 ```
 
  [stow]: https://metacpan.org/pod/distribution/Stow/bin/stow
