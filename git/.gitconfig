@@ -46,7 +46,7 @@
 	commit = true
 
 [include]
-  path = ~/.gitconfig.override
+  path = ~/.gitconfig.local
 [pull]
 	ff = only
 [push]
