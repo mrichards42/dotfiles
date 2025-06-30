@@ -4,6 +4,9 @@
           :main-opts  ["--main" "nrepl.cmdline"
                        "--middleware" "[cider.nrepl/cider-middleware]"
                        "--interactive"]}
+  :carve {:extra-deps {io.github.borkdude/carve {:git/url "https://github.com/borkdude/carve"
+                                                 :git/sha "fdd1d0bc432f63db69e3a72167ef5e46f10dfba7"}}
+          :main-opts  ["-m" "carve.main"]}
   :outdated {:deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
              :main-opts ["-m" "antq.core"]}
   :prof {:extra-deps {com.clojure-goes-fast/clj-async-profiler {:mvn/version "1.5.1"}}
