@@ -25,8 +25,14 @@
   tag-inc = !git tag $(git tag-next) && echo "tagged $(git tag-current)"
   tag-push = !git push origin $(git tag-current)
 
+[diff]
+  algorithm = histogram
+  colorMoved = plain
+  renames = true
+
 [diff "sopsdiffer"]
   textconv = sops -d
+
 [tag]
   sort = version:refname
 
@@ -43,6 +49,14 @@
   path = ~/.gitconfig.override
 [pull]
 	ff = only
+[push]
+  autoSetupRemote = true
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+[merge]
+  conflictstyle = zdiff3
 [init]
 	defaultBranch = main
 [branch]
