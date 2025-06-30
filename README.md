@@ -10,7 +10,7 @@ $ cd ~/dotfiles
 $ ./stow.sh --all
 
 # Or for individual packages
-$ ./stow.sh vim tmux shell
+$ ./stow.sh nvim tmux shell
 ```
 
 `./stow.sh` wraps a copy of [GNU Stow][stow], which requires only `perl`. Stow
