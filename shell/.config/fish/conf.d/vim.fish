@@ -11,3 +11,7 @@ alias :e=vim
 alias :q=exit
 alias :qa=exit
 alias :qa!=exit
+alias :vsp='tmux split-window -h'
+alias :vsplit='tmux split-window -h'
+alias :sp='tmux split-window -v'
+alias :split='tmux split-window -v'
