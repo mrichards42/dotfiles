@@ -42,11 +42,11 @@
 
       ;; the standard set of keys in lspconfig -- these might already be set?
       ; (map-key "gD" vim.lsp.buf.declaration)
-      ; (map-key "gd" vim.lsp.buf.definition)
-      ; (map-key "K" vim.lsp.buf.hover) ; TODO: might already be set?
+      (map-key "gd" vim.lsp.buf.definition)
+      ; (map-key "K" vim.lsp.buf.hover)           ; this is the default
       (map-key "<C-k>" vim.lsp.buf.signature_help)
-      (map-key "gi" vim.lsp.buf.implementation)
-      (map-key "gr" vim.lsp.buf.references)
+      ; (map-key "gi" vim.lsp.buf.implementation) ; get used to default: gri
+      ; (map-key "gr" vim.lsp.buf.references)     ; get used to default: grr
       (map-key "[d" vim.diagnostic.goto_prev)
       (map-key "]d" vim.diagnostic.goto_next)
       ;; all the leader keys from lspconfig, but prefixed

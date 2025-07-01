@@ -50,9 +50,8 @@ local function lsp_config()
       end
     end
     map_key = _4_
+    map_key("gd", vim.lsp.buf.definition)
     map_key("<C-k>", vim.lsp.buf.signature_help)
-    map_key("gi", vim.lsp.buf.implementation)
-    map_key("gr", vim.lsp.buf.references)
     map_key("[d", vim.diagnostic.goto_prev)
     map_key("]d", vim.diagnostic.goto_next)
     map_key("<leader>ld", vim.lsp.buf.type_definition)
