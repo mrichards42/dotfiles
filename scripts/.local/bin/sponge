@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Sponge from https://joeyh.name/code/moreutils/
+
+output="$1"
+
+cat > "$output.tmp"
+
+mv "$output.tmp" "$output"

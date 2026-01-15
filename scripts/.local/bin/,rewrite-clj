@@ -1,0 +1,366 @@
+#!/usr/bin/env bb
+
+(require '[babashka.cli :as cli]
+         '[babashka.process :as p]
+         '[clojure.core.match :as core.match]
+         '[clojure.java.io :as io]
+         '[clojure.string :as str]
+         '[clojure.test :refer [deftest testing is]]
+         '[clojure.walk :as walk]
+         '[rewrite-clj.node :as n]
+         '[rewrite-clj.zip :as z]
+         '[taoensso.timbre :as t])
+
+;; from babashka examples
+(defn- is-tty
+  [fd key]
+  (-> ["test" "-t" (str fd)] (p/process {key :inherit :env {}}) deref :exit (= 0)))
+(defn in-is-tty? [] (is-tty 0 :in))
+(defn out-is-tty? [] (is-tty 1 :out))
+(defn err-is-tty? [] (is-tty 2 :err))
+
+;; Helpers
+
+(def ^:dynamic *alias-map* {})
+
+(defn- split-keyword [x]
+  (when (keyword? x)
+    [(some-> (namespace x) keyword)
+     (some-> (name x) keyword)]))
+
+(defn- split-symbol [x]
+  (when (symbol? x)
+    [(some-> (namespace x) symbol)
+     (some-> (name x) symbol)]))
+
+(defn- resolve-symbol* [alias-map sym]
+  (if-let [ns-alias (namespace sym)]
+    (if-let [real-ns (get-in alias-map [:ns (symbol ns-alias)])]
+      (symbol (name real-ns) (name sym))
+      sym)
+    (or (get-in alias-map [:name sym]) sym)))
+
+(defn- resolve-symbol [x]
+  (when (symbol? x)
+    (resolve-symbol* *alias-map* x)))
+
+(defn- zip-walk-seq
+  ([zloc f] (zip-walk-seq zloc #(some? (z/up %)) f))
+  ([zloc p? f]
+   (let [ret (atom [])]
+     (z/postwalk zloc p? (fn [loc]
+                           (when-some [result (f (z/node loc))]
+                             (swap! ret conj result))
+                           loc))
+     @ret)))
+
+;; match-sexpr
+
+(defn- parse-pattern [pattern]
+  (walk/postwalk (fn [x]
+                   (if (list? x)
+                     (let [body (rest x)]
+                       (case (first x)
+                         list `(([~@body] :seq) :guard list?)
+                         keyword (do
+                                   (assert (= 2 (count body)) (str "Expected (keyword _ _) pattern to have two parts, got " (pr-str x)))
+                                   `([~@body] :<< split-keyword))
+                         symbol (do
+                                  (assert (= 2 (count body)) (str "Expected (symbol _ _) pattern to have two parts, got " (pr-str x)))
+                                  `([~@body] :<< split-symbol))
+                         resolve (do
+                                   (assert (= 1 (count body)) (str "Expected (resolve _) pattern to have two parts, got " (pr-str x)))
+                                   `(~(first body) :<< resolve-symbol))
+                         x))
+                     x))
+                 pattern))
+
+(defmacro match-sexpr
+  "Wraps [[clojure.core.match/match]], matching against a sexpr.
+
+  - adds :else ::default at the end if there is no :else clause
+  - special form (list ...) matches a list
+  - special form (keyword :ns :name) matches a keyword's parts
+  - special form (symbol 'ns 'name) matches a symbol's parts
+  - special form (resolve 'symbol) resolves a symbol first"
+  {:clj-kondo/lint-as 'clojure.core.match/match}
+  [node & patterns]
+  (let [patterns (mapcat (fn [[pat result]] [(parse-pattern pat) result])
+                         (partition-all 2 patterns))
+        patterns (if (some #{:else} patterns)
+                   patterns
+                   (concat patterns [:else ::default]))]
+    `(let [~'*node* ~node]
+       (core.match/match (n/sexpr ~'*node*) ~@patterns))))
+
+(defmacro match-simple
+  [& body]
+  (cond
+    (= 1 (count body)) `(match-sexpr ~'*node* ~(first body) ~'*node*)
+    (even? (count body)) `(match-sexpr ~'*node* ~@body)
+    :else (assert false "--match must have either 1 form or an even number of forms")))
+
+;; ns parsing
+
+(defn- parse-ns [top-level-zloc]
+  (when-let [ns-body (some-> (z/find-value top-level-zloc z/next 'ns) z/up z/sexpr)]
+    (when-let [requires (first (filter #(and (list? %) (= :require (first %))) ns-body))]
+      (->> (for [[?ns & clauses] (filter vector? (rest requires))
+                 :let [{?alias :as ?refer :refer ?rename :rename} (apply hash-map clauses)]]
+             {:ns {?alias ?ns}
+              :name (merge (into {} (keep (fn [x] (when-not (get ?rename x) [x (symbol (name ?ns) (name x))]))) ?refer)
+                           (into {} (map (fn [[sym renamed-sym]] [renamed-sym (symbol (name ?ns) (name sym))])) ?rename))})
+           (apply merge-with merge)))))
+
+;; Main code
+
+(defn fix-str-expr [s]
+  (-> s
+      (str/replace #":\?_current-ns_\?/" "::")
+      (str/replace #":\?_(.*?)_\?/" ":$1/")
+      (str/replace #"\(quote ([^)]+)\)" "'$1")))
+
+(defn replace-string [replace-fn s]
+  (let [edit-fn (fn [node]
+                  (let [result (replace-fn node)]
+                    (if (= ::default result)
+                      node
+                      (n/coerce result))))
+        s' (-> (z/of-string* s)
+               (z/postwalk #(some? (z/up %)) #(z/edit* % edit-fn))
+               (z/root-string))]
+    (if (not= s s')
+      (recur replace-fn s')
+      (fix-str-expr s))))
+
+(defn match-string [match-fn s & {:keys [output] :or {output :text}}]
+  (let [walk-fn (fn [node]
+                  (let [result (match-fn node)]
+                    (when (not= ::default result)
+                      (cond-> (n/coerce result)
+                        (= :text output) (-> n/string fix-str-expr)
+                        (= :sexpr output) n/sexpr))))]
+    (zip-walk-seq (z/of-string* s) walk-fn)))
+
+(defn script-text [script {match? :match :as opts}]
+  (if match?
+    (recur (str "(match-simple " script ")") (dissoc opts :match))
+    (str "(fn [*node*]
+         (let [*form* (try (n/sexpr *node*) (catch Exception _ ::default))]
+         (if (= ::default *form*) ::default " script ")))")))
+
+(defn report-matches [filename occurrences]
+  (let [isatty? (out-is-tty?)]
+    (if isatty?
+      (do
+        (when (seq occurrences)
+          (println (t/color-str :purple filename)))
+        (run! println occurrences))
+      (doseq [match occurrences]
+        (println (str filename ": ") (str/replace match "\n" (str "\n" filename ": ")))))))
+
+(defn do-rewrite [{:keys [script filenames inline] replace? :replace match? :match}]
+  (assert (not (and match? replace?)) "--match and --replace are mutually exclusive")
+  (let [script-fn (eval (read-string script))]
+    (doseq [filename filenames]
+      (let [stdin? (= "-" filename)
+            content (slurp (if stdin? *in* filename))]
+        (binding [*alias-map* (parse-ns (z/of-string* content))]
+          (cond
+            (and inline replace? (not stdin?)) (spit filename (replace-string script-fn content))
+            replace? (print (replace-string script-fn content))
+            :else (report-matches filename (match-string script-fn content))))))))
+
+;;; cli
+
+(declare -help)
+
+(def cli-options
+  {:args->opts [:script]
+   :spec {:script {:require true}
+          :replace {:coerce :boolean
+                    :desc "Prints the entire file; return value of `script` replaces the matched node."}
+          :inline {:coerce :boolean
+                   :alias :i
+                   :desc "Replaces files inline without printint. Only works with --replace."}
+          :match {:coerce :boolean
+                  :desc "wraps the script in `(match *node* ?? *node*)`"}
+          :test {:coerce :boolean :desc "run tests"}
+          :help {:coerce :boolean
+                 :alias :h
+                 :desc "Prints help and examples"}
+          :debug {:coerce :boolean}}
+   :restrict true
+   :no-keyword-opts true
+   :error-fn (fn [{:keys [type msg opts] :as data}]
+               ;; Some flags can be run even if there are errors
+               (when-not (some opts [:test :help :debug])
+                 (if (= :org.babashka/cli type)
+                   (println msg)
+                   (throw (ex-info msg data)))
+                 (-help)
+                 (System/exit 1)))})
+
+(defn parse-examples []
+  (match-string
+    (fn [*node*]
+      (match-sexpr *node*
+        ((list 'testing ?name
+               (list 'is (list '= (list ?op (list 'fn ['*node*] & ?body) ?input)
+                               ?expected)))
+         :guard (comp :?_current-ns_?/example meta))
+        [?name ?op ?body ?input ?expected]))
+    (slurp *file*)
+    {:output :sexpr}))
+
+(defn -print-examples []
+  (doseq [[?name ?op ?body ?input ?output] (parse-examples)]
+    (println)
+    (println "  ;;;" ?name)
+    (printf "  ,rewrite-clj%s %s\n"
+            (if (= 'replace-string ?op) " --replace" "")
+            (str/join " " (map (comp pr-str fix-str-expr pr-str) ?body)))
+    (printf "  ; input\n  ")
+    (prn ?input)
+    (printf "  ; output\n  ")
+    (prn ?output)))
+
+(defn -help [& {:keys [long?]}]
+  (println "Usage:" (.getName (io/file *file*)) "[options] script filenames...")
+  (println)
+  (->> "Searches clojure code in a list of `filenames` using `script`. Inside
+       `script`, *node* is bound to a rewrite-clj node and *form* is bound to a
+       sexpr. Prints whatever `script` returns.
+
+       Typically you will use `match-sexpr` to use clojure.core/match on parsed
+       sexprs. This supports several special forms on top of clojure.core/match:"
+       (str/split-lines)
+       (map str/trim)
+       (run! println))
+  (println)
+  (->> (:doc (meta #'match-sexpr))
+       (str/split-lines)
+       (map str/trim)
+       (filter #(re-find #"^- special form" %))
+       (run! #(printf "  %s\n" %)))
+  (println)
+  (println "Options:")
+  (println)
+  (println (cli/format-opts (update cli-options :spec dissoc :script :filenames :debug)))
+  (when long?
+    (println)
+    (println "Examples:")
+    (-print-examples)))
+
+(defn -main [args]
+  (let [opts (cli/parse-opts args cli-options)
+        opts (assoc opts :filenames (-> opts meta :org.babashka/cli :args (or ["-"]) vec))
+        opts (update opts :script #(when % (script-text % opts)))]
+    (cond
+      (:help opts) (-help {:long? true})
+      (:debug opts) (prn 'debug opts)
+      (:test opts) (clojure.test/run-tests *ns*)
+      :else (do-rewrite opts))))
+
+;;; Tests
+
+(deftest replace-test
+  ^::example
+  (testing "rename function and reorder args"
+    (is (= (replace-string
+            (fn [*node*]
+              (match-sexpr *node*
+                (list 'foo ?x ?y) (list 'bar ?y ?x)))
+            "(foo 1 2)")
+           "(bar 2 1)")))
+  (testing "meander 0 reducer"
+    (is (= (replace-string
+            (fn [*node*]
+              (match-sexpr *node*
+                (list '+ ?x 0) ?x
+                (list '+ 0 ?x) ?x))
+            "(+ (+ 0 (+ 0 (+ 3 (+ 2 0)))) 0)")
+           "(+ 3 2)")))
+  (testing "literal adder"
+    (is (= (replace-string
+            (fn [*node*]
+              (match-sexpr *node*
+                (list '+ (?x :guard number?) (?y :guard number?)) (+ ?x ?y)
+                (list '+ ?x ?y ?z & ?more) (list* '+ (list '+ ?x ?y) ?z ?more)))
+            "(+ 1 (+ 2 (+ 3 (+ 4 (+ 5 6)))) 7 8 9 3)")
+           "48"))))
+
+(deftest match-test
+  (testing "list test names (single test)"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (list 'deftest ?name & _) ?name))
+             "(deftest test-1 (is (= 2 (+ 1 1))))")
+           ["test-1"])))
+  ^::example
+  (testing "list test names"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (list 'deftest ?name & _) ?name))
+             "(deftest test-1 (is (= 2 (+ 1 1))))
+             (deftest test-2 (is (= 4 (+ 2 2))))")
+           ["test-1" "test-2"]))))
+
+(deftest extra-syntax-test
+  (testing "lists only match lists"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (list 'a ?b ?c) [?b ?c]))
+             "[a 1 2] (a 3 4)")
+           ["[3 4]"])))
+  (testing "keywords can be split, and only match keywords"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (keyword ?ns ?name) [?ns ?name]))
+             ":some/keyword :other-keyword 'some/symbol 'other-symbol")
+           ["[:some :keyword]" "[nil :other-keyword]"])))
+  (testing "can match keywords with any namespace"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (keyword _ :world) *node*))
+             ":hello :hi/world :world")
+           [":hi/world" ":world"])))
+  (testing "symbols can be split, and only match symbols"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (symbol ?ns ?name) [?ns ?name]))
+             ":some/keyword :other-keyword some/symbol other-symbol")
+           ["[some symbol]" "[nil other-symbol]"])))
+  (testing "can match symbols with any namespace"
+    (is (= (match-string
+             (fn [*node*]
+               (match-sexpr *node*
+                 (symbol _ 'world) *node*))
+             "hello hi/world world")
+           ["hi/world" "world"]))))
+
+(deftest ns-parsing-and-aliases
+  (let [alias-map (parse-ns (z/of-string* "(ns hello (:require world [foo.bar :as f :refer [a b c]] [baz :as baz :refer [d e f] :rename {f hi-f}]))"))]
+    (testing "alias map"
+      (is (= '{:ns {f foo.bar baz baz}
+               :name {a foo.bar/a b foo.bar/b c foo.bar/c
+                      d baz/d e baz/e hi-f baz/f}}
+             alias-map)))
+    (testing "resolve-sym"
+      (is (= 'baz/f (resolve-symbol* alias-map 'hi-f)))
+      (is (= 'foo.bar/a (resolve-symbol* alias-map 'a)))
+      (is (= 'foo.bar/whatever (resolve-symbol* alias-map 'f/whatever)))
+      (is (= 'baz/whatever (resolve-symbol* alias-map 'baz/whatever)))
+      (is (= 'no (resolve-symbol* alias-map 'no)))
+      (is (= 'no/way (resolve-symbol* alias-map 'no/way))))))
+
+;; Entrypoint
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main *command-line-args*))

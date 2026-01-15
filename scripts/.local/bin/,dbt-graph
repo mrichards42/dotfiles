@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ ! -e target/manifest.json ]]; then
+  >&2 echo "Can't find target/manifest.json; run dbt parse first"
+  exit 1
+fi
+
+filter="${1:-.*}"
+
+jq -rc --arg filter "$filter" '
+  "model.\(.metadata.project_name)." as $prefix |
+
+  "digraph g {",
+  "  rankdir=LR",
+
+  (
+  .nodes | to_entries[] | select(.key | startswith($prefix)) |
+    (.key | gsub($prefix; "")) as $parent |
+    .value.depends_on.nodes[] | select(startswith($prefix)) | gsub($prefix; "") as $child |
+    select(($parent | test($filter)) and ($child | test($filter))) |
+    "  \($parent) -> \($child)"
+  ),
+
+  "}"
+' target/manifest.json
