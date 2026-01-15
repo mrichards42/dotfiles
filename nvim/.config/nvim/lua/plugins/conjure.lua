@@ -1,5 +1,7 @@
 -- [nfnl] fnl/plugins/conjure.fnl
+local filetypes = {"clojure", "fennel", "python"}
 local function _1_()
+  vim.g["conjure#filetypes"] = filetypes
   vim.g["conjure#client_on_load"] = false
   vim.g["conjure#mapping#doc_word"] = "k"
   vim.g["conjure#mapping#eval_current_form"] = {"cpp"}
@@ -10,4 +12,4 @@ local function _1_()
   vim.g["conjure#mapping#def_word"] = "d"
   return nil
 end
-return {"Olical/conjure", ft = {"clojure", "fennel", "python"}, lazy = true, init = _1_}
+return {"Olical/conjure", ft = filetypes, lazy = true, init = _1_}

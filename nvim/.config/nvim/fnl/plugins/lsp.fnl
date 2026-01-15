@@ -65,22 +65,39 @@
    {:group (vim.api.nvim_create_augroup :my-lsp-attach {:clear true})
     :callback on-attach}))
 
+(fn memoize-1 [f]
+  (let [memo {}]
+    (fn [arg]
+      (when (= nil (. memo arg))
+        (tset memo arg [(f arg)]))
+      (. memo arg 1))))
+
+(local executable?
+  (memoize-1 #(= 1 (vim.fn.executable $))))
+
 ;; TODO: only enable things that are installed?
 ;; TODO: install prettierd? (for markdown?)
 (fn null-ls-config []
-  (let [null-ls (require :null-ls)]
-    {:sources [
-               ; (null-ls.builtins.formatting.prettier.with
-               ;   {:only_local "node_modules/.bin"})
-               ; (null-ls.builtins.diagnostics.sqlfluff.with
-               ;   {:extra_args {:--dialect "postgres"}})
-               ; null-ls.builtins.diagnostics.eslint_d
-               ; (null-ls.builtins.formatting.cljstyle.with
-               ;   {:command "cljfmt"
-               ;    :args ["fix" "-q" "-"]})
-               (null-ls.builtins.formatting.zprint.with
-                {:command "zprint"
-                 :args ["{:search-config? true}"]})]
+  (let [null-ls (require :null-ls)
+        sources []]
+    (when (executable? "sqlfluff")
+      (table.insert sources null-ls.builtins.diagnostics.sqlfluff))
+    (when (executable? "sqlfluff")
+      (table.insert sources
+                    (null-ls.builtins.formatting.sqlfluff.with
+                     {:args ["format" "--disable-progress-bar" "-n" "-"]})))
+    (if (executable? "node_modules/.bin/prettier")
+      (table.insert sources
+                    (null-ls.builtins.formatting.prettier.with
+                     {:only_local "node_modules/.bin"}))
+      (when (executable? "prettier")
+        (table.insert sources null-ls.builtins.formatting.prettier)))
+    (when (executable? "zprint")
+      (table.insert sources
+                    (null-ls.builtins.formatting.zprint.with
+                     {:command "zprint"
+                      :args ["{:search-config? true}"]})))
+    {:sources sources
      :diagnostics_format "[#{c}] #{m} (#{s})"}))
 
 [{1 "neovim/nvim-lspconfig"

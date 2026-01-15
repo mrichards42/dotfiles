@@ -24,7 +24,7 @@ let g:clojure_fuzzy_indent_blacklist = []
 
 
 " work
-let g:conjure#client#clojure#nrepl#test#runner = 'kaocha'
+" let g:conjure#client#clojure#nrepl#test#runner = 'kaocha'
 
 " conjure is way better at this than lsp
 " but not in cljc!

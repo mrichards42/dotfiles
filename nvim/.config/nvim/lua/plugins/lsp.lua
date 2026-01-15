@@ -66,8 +66,45 @@ local function lsp_config()
   end
   return vim.api.nvim_create_autocmd("LspAttach", {group = vim.api.nvim_create_augroup("my-lsp-attach", {clear = true}), callback = on_attach})
 end
+local function memoize_1(f)
+  local memo = {}
+  local function _10_(arg)
+    if (nil == memo[arg]) then
+      memo[arg] = {f(arg)}
+    else
+    end
+    return memo[arg][1]
+  end
+  return _10_
+end
+local executable_3f
+local function _12_(_241)
+  return (1 == vim.fn.executable(_241))
+end
+executable_3f = memoize_1(_12_)
 local function null_ls_config()
   local null_ls = require("null-ls")
-  return {sources = {null_ls.builtins.formatting.zprint.with({command = "zprint", args = {"{:search-config? true}"}})}, diagnostics_format = "[#{c}] #{m} (#{s})"}
+  local sources = {}
+  if executable_3f("sqlfluff") then
+    table.insert(sources, null_ls.builtins.diagnostics.sqlfluff)
+  else
+  end
+  if executable_3f("sqlfluff") then
+    table.insert(sources, null_ls.builtins.formatting.sqlfluff.with({args = {"format", "--disable-progress-bar", "-n", "-"}}))
+  else
+  end
+  if executable_3f("node_modules/.bin/prettier") then
+    table.insert(sources, null_ls.builtins.formatting.prettier.with({only_local = "node_modules/.bin"}))
+  else
+    if executable_3f("prettier") then
+      table.insert(sources, null_ls.builtins.formatting.prettier)
+    else
+    end
+  end
+  if executable_3f("zprint") then
+    table.insert(sources, null_ls.builtins.formatting.zprint.with({command = "zprint", args = {"{:search-config? true}"}}))
+  else
+  end
+  return {sources = sources, diagnostics_format = "[#{c}] #{m} (#{s})"}
 end
 return {{"neovim/nvim-lspconfig", dependencies = {{"williamboman/mason.nvim", opts = {}}, {"williamboman/mason-lspconfig.nvim", opts = {ensure_installed = vim.tbl_keys(lsp_servers)}}}, config = lsp_config}, {"nvimtools/none-ls.nvim", dependencies = {"nvim-lua/plenary.nvim"}, opts = null_ls_config}, {"folke/trouble.nvim", opts = {}, cmd = "Trouble", keys = {{"<leader>xx", "<cmd>Trouble diagnostics toggle<cr>"}}}}

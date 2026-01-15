@@ -1,7 +1,9 @@
+(local filetypes [:clojure :fennel :python])
 {1 "Olical/conjure"
- :ft [:clojure :fennel :python]
+ :ft filetypes
  :lazy true
  :init #(do
+          (set vim.g.conjure#filetypes filetypes)
           ;; dont auto-start repls
           (set vim.g.conjure#client_on_load false)
           ;; key bindings
