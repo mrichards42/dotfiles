@@ -149,17 +149,20 @@
          (let [*form* (try (n/sexpr *node*) (catch Exception _ ::default))]
          (if (= ::default *form*) ::default " script ")))")))
 
-(defn report-matches [filename occurrences]
+(defn report-matches [filename occurrences {:keys [files-with-matches]}]
   (let [isatty? (out-is-tty?)]
     (if isatty?
       (do
         (when (seq occurrences)
           (println (t/color-str :purple filename)))
-        (run! println occurrences))
+        (when-not files-with-matches
+          (run! println occurrences)))
       (doseq [match occurrences]
-        (println (str filename ": ") (str/replace match "\n" (str "\n" filename ": ")))))))
+        (if files-with-matches
+          (println filename)
+          (println (str filename ": ") (str/replace match "\n" (str "\n" filename ": "))))))))
 
-(defn do-rewrite [{:keys [script filenames inline] replace? :replace match? :match}]
+(defn do-rewrite [{:keys [script filenames inline] replace? :replace match? :match :as opts}]
   (assert (not (and match? replace?)) "--match and --replace are mutually exclusive")
   (let [script-fn (eval (read-string script))]
     (doseq [filename filenames]
@@ -169,7 +172,7 @@
           (cond
             (and inline replace? (not stdin?)) (spit filename (replace-string script-fn content))
             replace? (print (replace-string script-fn content))
-            :else (report-matches filename (match-string script-fn content))))))))
+            :else (report-matches filename (match-string script-fn content) opts)))))))
 
 ;;; cli
 
@@ -178,14 +181,20 @@
 (def cli-options
   {:args->opts [:script]
    :spec {:script {:require true}
+          ;; replace and options
           :replace {:coerce :boolean
                     :desc "Prints the entire file; return value of `script` replaces the matched node."}
           :inline {:coerce :boolean
                    :alias :i
                    :desc "Replaces files inline without printint. Only works with --replace."}
+          ;; match and options
           :match {:coerce :boolean
                   :desc "wraps the script in `(match *node* ?? *node*)`"}
-          :test {:coerce :boolean :desc "run tests"}
+          :files-with-matches {:coerce :boolean
+                               :alias :l
+                               :desc "Lists only the filenames with matches"}
+          ;; misc
+          :test {:coerce :boolean :desc "Runs tests"}
           :help {:coerce :boolean
                  :alias :h
                  :desc "Prints help and examples"}
