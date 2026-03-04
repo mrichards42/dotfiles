@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Resolves 1p secrets in a .env file and prints the result as KEY=VAL pairs
+
+set -euo pipefail
+
+parse() {
+  exec perl -lne '/^([^=# ]+)/ && print "$1=$ENV{$1}"' "$1"
+}
+
+main() {
+  exec op run --env-file="$1" --no-masking -- env OP_ENV_PHASE=parse "$0" "$@"
+}
+
+"${OP_ENV_PHASE:-main}" "$@"

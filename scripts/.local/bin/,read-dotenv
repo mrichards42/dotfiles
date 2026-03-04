@@ -1,0 +1,16 @@
+#!/usr/bin/env perl
+
+# Parses values from a .env file and prints them as KEY=VAL pairs
+
+while (<>) {
+  # double-quoted
+  if (/^([^=# ]+)\s*=\s*"(.*?)"/) {
+    print "$1=$2\n"
+  # single-quoted
+  } elsif (/^([^=# ]+)\s*=\s*'(.*?)'/) {
+    print "$1=$2\n"
+  # unquoted
+  } elsif (/^([^=# ]+)\s*=\s*(.*?)\s*(#.*|$)/) {
+    print "$1='$2'\n"
+  }
+}
