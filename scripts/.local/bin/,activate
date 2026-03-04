@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Activates the poetry environment in a new shell
+# Reads the environment from .env (which may include 1p secrets)
+# With --aws, also starts an aws-vault session
+
+set -euo pipefail
+
+vars=()
+
+read-vars() {
+  while IFS= read -r line; do
+    vars+=("$line")
+  done <<<"$1"
+}
+
+if [[ " $* " = *' --aws '* ]]; then
+  aws_vars="$(aws-vault export tyba --format=env)"
+  read-vars "$aws_vars"
+fi
+
+if [[ -f .env && " $* " != *' --no-env '* ]]; then
+  if grep -q 'op://' .env; then
+    dotenv_vars="$(,read-openv .env)"
+  else
+    dotenv_vars="$(,read-dotenv .env)"
+  fi
+  read-vars "$dotenv_vars"
+fi
+
+if [[ "${#vars[@]}" -gt 0 ]]; then
+  exec env "${vars[@]}" fish --init-command "eval \$(poetry env activate)"
+else
+  fish --init-command "eval \$(poetry env activate)"
+fi
