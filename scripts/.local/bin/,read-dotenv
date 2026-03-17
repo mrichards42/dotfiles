@@ -11,6 +11,6 @@ while (<>) {
     print "$1=$2\n"
   # unquoted
   } elsif (/^([^=# ]+)\s*=\s*(.*?)\s*(#.*|$)/) {
-    print "$1='$2'\n"
+    print "$1=$2\n"
   }
 }

@@ -6,7 +6,12 @@
 
 set -euo pipefail
 
-vars=()
+if [[ "${IN_ACTIVATED_SHELL:-0}" = 1 ]]; then
+  echo "Can't nest activated shells"
+  exit 1
+fi
+
+vars=(IN_ACTIVATED_SHELL=1)
 
 read-vars() {
   while IFS= read -r line; do
@@ -16,6 +21,9 @@ read-vars() {
 
 if [[ " $* " = *' --aws '* ]]; then
   aws_vars="$(aws-vault export tyba --format=env)"
+  read-vars "$aws_vars"
+elif [[ " $* " = *' --aws-no-session '* ]]; then
+  aws_vars="$(aws-vault export tyba --format=env --no-session)"
   read-vars "$aws_vars"
 fi
 
@@ -28,8 +36,4 @@ if [[ -f .env && " $* " != *' --no-env '* ]]; then
   read-vars "$dotenv_vars"
 fi
 
-if [[ "${#vars[@]}" -gt 0 ]]; then
-  exec env "${vars[@]}" fish --init-command "eval \$(poetry env activate)"
-else
-  fish --init-command "eval \$(poetry env activate)"
-fi
+exec env "${vars[@]}" fish --init-command "eval \$(poetry env activate)"
