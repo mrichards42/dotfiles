@@ -149,18 +149,20 @@
          (let [*form* (try (n/sexpr *node*) (catch Exception _ ::default))]
          (if (= ::default *form*) ::default " script ")))")))
 
-(defn report-matches [filename occurrences {:keys [files-with-matches]}]
+(defn report-matches [filename occurrences {:keys [files-with-matches no-filename]}]
   (let [isatty? (out-is-tty?)]
     (if isatty?
       (do
-        (when (seq occurrences)
+        (when (and (seq occurrences) (not no-filename))
           (println (t/color-str :purple filename)))
         (when-not files-with-matches
           (run! println occurrences)))
       (doseq [match occurrences]
         (if files-with-matches
           (println filename)
-          (println (str filename ": ") (str/replace match "\n" (str "\n" filename ": "))))))))
+          (println (when-not no-filename
+                     (str filename ": "))
+                   (str/replace match "\n" (str "\n" filename ": "))))))))
 
 (defn do-rewrite [{:keys [script filenames inline] replace? :replace match? :match :as opts}]
   (assert (not (and match? replace?)) "--match and --replace are mutually exclusive")
@@ -193,6 +195,9 @@
           :files-with-matches {:coerce :boolean
                                :alias :l
                                :desc "Lists only the filenames with matches"}
+          :no-filename {:coerce :boolean
+                        :alias :I
+                        :desc "Does not print the filename"}
           ;; misc
           :test {:coerce :boolean :desc "Runs tests"}
           :help {:coerce :boolean
