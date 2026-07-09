@@ -142,13 +142,18 @@ each artifact's own format conventions — these notes are about wording, not fo
   docs — references, ADRs, glossaries — carry more detail and their own structure; these three
   moves are specific to the introductory guide.
 - **Glossary / reference entries (CONTEXT.md, design docs):** lead with a one-sentence
-  definition, then elaborate only as far as the reader needs to *use* the term. Define and
-  link; if you find yourself narrating step-by-step *mechanism* — how the engine does it, the
-  phases it runs, the data structures — that belongs in the ADR or code, so summarize it in a
-  clause and link out (principle 2). An entry that has grown past a tight paragraph is
-  usually reproducing what an ADR already owns. When two sibling entries explain the same
-  mechanism, one owns the explanation and the other links to it — define-once applied between
-  entries, not only within one.
+  definition, then elaborate only as far as the reader needs to *recognize and use* the
+  term, including how it differs from adjacent terms. Test every sentence after the
+  definition and route what is not definitional to its home: *how* it works (the engine's
+  steps and phases, the data structures, where a value physically rides) and *why* it
+  exists (rationale, motivation, "it exists because…") go to the ADR or code; *which
+  option* to pass (API forms, keys, shorthands, flags) goes to the usage guide; *what it
+  replaced* (migration and precedent notes) is usually just cut. Keep only what lets a
+  reader tell the term from its neighbors and use it correctly, and link out for the
+  rest (principle 2). An entry grown past a tight
+  paragraph is usually reproducing what an ADR or USAGE already owns. When two sibling
+  entries explain the same thing, one owns it and the other links — define-once applied
+  between entries, not only within one.
 - **Commit messages / PR descriptions:** say what changed and why, and what a reviewer
   should check. Not a narrative of the debugging session (principle 6). No selling the
   change ("massively improves…") — state the effect. Keep it high-level (principle 2): a
