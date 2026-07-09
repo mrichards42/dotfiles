@@ -94,10 +94,10 @@ local function null_ls_config()
   else
   end
   if executable_3f("node_modules/.bin/prettier") then
-    table.insert(sources, null_ls.builtins.formatting.prettier.with({only_local = "node_modules/.bin"}))
+    table.insert(sources, null_ls.builtins.formatting.prettier.with({only_local = "node_modules/.bin", extra_args = {"--prose-wrap", "always"}}))
   else
     if executable_3f("prettier") then
-      table.insert(sources, null_ls.builtins.formatting.prettier)
+      table.insert(sources, null_ls.builtins.formatting.prettier.with({extra_args = {"--prose-wrap", "always"}}))
     else
     end
   end

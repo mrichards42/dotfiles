@@ -89,9 +89,12 @@
     (if (executable? "node_modules/.bin/prettier")
       (table.insert sources
                     (null-ls.builtins.formatting.prettier.with
-                     {:only_local "node_modules/.bin"}))
+                     {:only_local "node_modules/.bin"
+                      :extra_args ["--prose-wrap" "always"]}))
       (when (executable? "prettier")
-        (table.insert sources null-ls.builtins.formatting.prettier)))
+        (table.insert sources
+                      (null-ls.builtins.formatting.prettier.with
+                       {:extra_args ["--prose-wrap" "always"]}))))
     (when (executable? "zprint")
       (table.insert sources
                     (null-ls.builtins.formatting.zprint.with
