@@ -19,6 +19,7 @@
                                    :html
                                    :jsdoc
                                    :json
+                                   :jsonnet
                                    :lua
                                    :make
                                    :markdown
