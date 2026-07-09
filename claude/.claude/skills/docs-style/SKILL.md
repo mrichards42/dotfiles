@@ -70,11 +70,16 @@ reason a pass misses what it should have caught. If you touched a unit, you own 
    rejected path stated timelessly rather than as narration ("there is no X") is the same
    noise — see principle 10.
 
-7. **One idea per sentence.** Break run-on chains and stacked parentheticals. An em-dash or
-   parenthetical usually marks a second idea bolted onto the sentence, so treat each one as a
-   prompt to restructure. If the aside is a full idea, give it its own sentence. If it is a
-   qualifier, fold it into the main clause. If it is neither, cut it. Keep the dash or parens
-   only for a short, subordinate aside that would derail as its own sentence.
+7. **One idea per sentence.** Break run-on chains and stacked parentheticals. An em-dash,
+   parenthetical, semicolon, or colon usually marks a second idea bolted onto the sentence, so
+   treat each one as a prompt to restructure. A semicolon joins two independent clauses that
+   almost always read better as two sentences. Default to splitting or folding a colon too, and
+   keep one only where it genuinely makes the prose easier to read than either alternative —
+   chiefly to introduce a list, or an appositive or definition a period would chop awkwardly.
+   Even then the right side must complete the left as a clause, appositive, or list, not a bare
+   participle or modifier a comma should carry. If an aside is a full idea, give it its own
+   sentence. If it is a qualifier, fold it into the main clause. If it is neither, cut it. Keep
+   the punctuation only for a short, subordinate aside that would derail as its own sentence.
 
 8. **Cite precedent once.** Name prior art (a library, a paper, a sibling system) where it
    justifies a decision — once, where the decision is made. Don't repeat "the same idea as
@@ -310,21 +315,20 @@ grep -rnoE '\]\([^)]*#[a-z0-9-]+\)' <files>          # each #anchor link — its
 grep -rnoE '\[#[a-z0-9-]+-[0-9]+\]\([^)]+\)' <files> # each ADR citation — its number must match the target filename
 ```
 
-Last, list every em-dash and parenthetical and re-read each against principle 7. Most mark a
-second idea that reads clearer split into its own sentence or folded into the main clause; keep
-the punctuation only where the aside is short and genuinely subordinate.
+Last, list every em-dash, parenthetical, semicolon, and mid-clause colon, and re-read each
+against principle 7, keeping only the ones it sanctions.
 
 ```
-grep -nE "—|\(" <files>
+grep -nE "—|\(|[a-z][;:] " <files>
 ```
 
 This last grep assumes a prose file. On a code file (docstrings/comments embedded in
-`.py`, `.go`, etc.) the two halves behave differently:
+`.py`, `.go`, etc.) the halves behave differently:
 
 - `—` still travels: em-dashes don't occur in code syntax, so every hit is in a comment,
   docstring, or string. Keep this half.
-- `\(` is prose-only: in code it matches every call, signature, and tuple, drowning the
-  parenthetical asides it's meant to find. Drop it and review the prose lines directly —
-  read the comment and docstring lines you added (for a commit, `git show <sha>` and scan
-  the added `#`/docstring lines), since the grep can't tell `foo(v)` from "(now stale)"
-  but your eye can.
+- `\(` and `[a-z][;:] ` are prose-only: in code they match calls and tuples, statement
+  terminators (`;`), and slices, dicts, and labels (`:`), drowning the asides they target.
+  Drop them and review the prose lines directly — read the comment and docstring lines you
+  added (for a commit, `git show <sha>` and scan the added `#`/docstring lines), since the
+  grep can't tell `foo(v)` from "(now stale)" but your eye can.
