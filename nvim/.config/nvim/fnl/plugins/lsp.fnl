@@ -7,12 +7,16 @@
   {:dockerls {}
    ;; Note: you're still going to have to install extensions, e.g.
    ;; :PylspInstall python-lsp-black python-lsp-ruff
-   :pylsp {:settings {:pylsp {:plugins {;; sort imports with ruff
-                                        :ruff {:format ["I"]}
-                                        :rope_autoimport {:enabled true}}}}}
+   ; :pylsp {:settings {:pylsp {:plugins {;; sort imports with ruff
+   ;                                      :ruff {:format ["I"]}
+   ;                                      :rope_autoimport {:enabled true}}}}}
    :bashls {:filetypes [:sh :bash :zsh]}
    :clojure_lsp {}
-   :terraformls {}})
+   :terraformls {}
+   :jsonnet_ls {}
+   ;; Instead of pylsp
+   :ruff {}
+   :ty {}})
 
 ;; TODO: cleanup -- other autocmmds from kickstart.nvim?
 (fn lsp-config []

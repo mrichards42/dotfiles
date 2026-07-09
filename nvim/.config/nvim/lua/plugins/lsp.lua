@@ -1,6 +1,6 @@
 -- [nfnl] fnl/plugins/lsp.fnl
 vim.diagnostic.config({underline = true, virtual_text = false})
-local lsp_servers = {dockerls = {}, pylsp = {settings = {pylsp = {plugins = {ruff = {format = {"I"}}, rope_autoimport = {enabled = true}}}}}, bashls = {filetypes = {"sh", "bash", "zsh"}}, clojure_lsp = {}, terraformls = {}}
+local lsp_servers = {dockerls = {}, bashls = {filetypes = {"sh", "bash", "zsh"}}, clojure_lsp = {}, terraformls = {}, jsonnet_ls = {}, ruff = {}, ty = {}}
 local function lsp_config()
   do
     local ok_3f, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
@@ -17,15 +17,15 @@ local function lsp_config()
   local function on_attach()
     local existing_keys
     do
-      local tbl_16_ = {}
+      local tbl_21_ = {}
       for _, m in ipairs(vim.api.nvim_buf_get_keymap(0, "n")) do
-        local k_17_, v_18_ = m.lhs, m.lhs
-        if ((k_17_ ~= nil) and (v_18_ ~= nil)) then
-          tbl_16_[k_17_] = v_18_
+        local k_22_, v_23_ = m.lhs, m.lhs
+        if ((k_22_ ~= nil) and (v_23_ ~= nil)) then
+          tbl_21_[k_22_] = v_23_
         else
         end
       end
-      existing_keys = tbl_16_
+      existing_keys = tbl_21_
     end
     local has_mapping_3f
     local function _3_(key)
