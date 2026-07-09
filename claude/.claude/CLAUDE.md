@@ -22,6 +22,14 @@ welcome. Keep it succinct and direct — a few of the `docs-style` principles st
 - **One idea per sentence.** An em-dash or parenthetical usually marks a second idea bolted
   on — split it into its own sentence or fold it into the main clause.
 
+## Formatting
+
+When writing markdown files, do not worry about manual formatting, use prettier to format them after the fact:
+
+```sh
+prettier --prose-wrap always
+```
+
 # Writing code
 
 How I like code written. Applies to all languages; the examples are Clojure.
