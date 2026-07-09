@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+for sandbox in $(sbx ls -q); do
+  sbx cp ~/.claude/ "$sandbox":/home/agent/
+  sbx exec "$sandbox" bash -c 'sudo chown -R agent:agent /home/agent/.claude'
+done
