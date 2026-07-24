@@ -34,34 +34,64 @@ prettier --prose-wrap always
 
 How I like code written. Applies to all languages; the examples are Clojure.
 
+## Principles
+
+General design ideas to reason from.
+
+- **Separation of concerns.** Give each function, namespace, and data structure a single
+  concern, and combine them only where a consumer needs both at once. In a data-driven UI,
+  keep the plain data manipulation (reshaping, aggregating, joining) apart from the UI-specific
+  transformation (resolving labels, formatting, layout), even where both are pure. Data read
+  or changed independently belongs in separate shapes.
+- **Functional core, imperative shell.** Keep the logic a pipeline of pure functions over
+  plain data, and push side effects out to a thin shell around it: I/O, persistence,
+  rendering, and encoding to an external API's format.
+- **Phase separation.** Model complicated logic as a series of small passes (normalize the
+  inputs, transform each item, then reduce), each with one responsibility and each consuming
+  the previous step's output. Compute an intricate transform on its own, then layer further
+  concerns such as annotation over its finished result. Drop a pass that only forwards its
+  input.
+- **Name domain concepts as functions or data types.** When a transformation carries meaning
+  or recurs, extract and name it (a `join`, a `merge`, or a semantic predicate such as
+  `valid?`/`invalid?` via `complement`) instead of leaving an anonymous `reduce` or lambda
+  inline. Likewise name a recurring shape as a type or schema, referenced from every arity
+  (`def FooOpts`). A trivial one-off lambda, or a keyword used as a function, stays inline;
+  don't extract for its own sake. Named concepts compose, and call sites read as operations on
+  domain objects.
+- **Prefer one explicit form over sugar plus normalization.** If a function needs a canonical
+  input shape, take that shape. Don't accept a convenience form and expand it internally — the
+  normalizer is indirection every reader and call site pays for. Add sugar only when call-site
+  terseness clearly outweighs it.
+- **Avoid overly defensive code.** Trust invariants the caller's contract guarantees. Add an
+  assert only when the invariant isn't obvious at the call site, or a validation function when
+  incorrect input provided by the user is an actual possibility. Reserve defensive handling for
+  inputs the contract actually allows to be partial or nil.
+
+## Idioms and details
+
+Specific conventions to apply as you write.
+
 - **Short docstrings carried by an example.** One line saying what the function does, then a
   fenced `Example:` block with `#_=>` when the shape isn't obvious. Don't narrate the whole
   mechanism or the "why" in prose across multiple sentences. Keep the domain narrative in one
   place — the design doc / README / ADR — and don't restate it, or its issue/ADR citations,
   across docstrings.
-- **Compile once, pass once.** Build a per-row/per-item function and run a single pass with
-  composed transducers, rather than a separate whole-collection pass per case. Prefer named
-  `*-fn` builders that return the function.
-- **Small named helpers over inline lambdas.** Extract semantic predicates (`valid?`,
-  `invalid?` as a `complement`) and small marker fns instead of inlining
-  `(fn [[_ {:keys [status]}]] …)` or repeated `assoc`s.
 - **Separate validation from transformation.** Pull checks into a dedicated `validate-*!`
   function, one `(when-let [x (not-empty …)] (throw …))` per check, instead of a `cond` with
   throws mixed into the transform.
-- **Name and reuse schemas.** Extract a `(def FooOpts …)` and reference it from every arity;
-  use the `:->` shorthand over `[:=> [:cat …] …]`.
+- **Compile once, pass once.** Where you'd otherwise walk the same collection several times,
+  build a per-item function and run one pass with composed transducers (a named `*-fn` builder
+  that returns it). For a single straightforward pass, a plain `mapv`/`->>` is clearer; reserve
+  the transducer machinery for removing redundant passes or a hot path.
 - **Reach for existing helpers first.** Use library functions (`medley/filter-vals`, or `encore`
   functions, etc.) and add to the shared util namespace rather than hand-rolling `(into {} (filter …))`.
+- **Prefer the `:->` schema shorthand.** Use `:->` over the longhand `[:=> [:cat …] …]`.
 - **Make primitives total.** Handle the empty/edge case inside the low-level function (e.g. an
   empty filter → `(constantly true)`) so callers don't special-case it.
-- **Prefer one explicit form over sugar plus normalization.** If a function needs a canonical
-  input shape, take that shape. Don't accept a convenience form and expand it internally — the
-  normalizer is indirection every reader and call site pays for. Add sugar only when call-site
-  terseness clearly outweighs it.
-- **Omit a key rather than assoc nil.** Use `(cond-> row p (assoc k v))`, not
-  `(assoc row k (when p v))`.
-- **Phase separation.** Split a transform into distinct passes with single responsibilities
-  (normalize the inputs, then transform each item, then reduce) rather than interleaving them.
+- **Don't intentionally assoc nil.** For a conditional key, omit it with
+  `(cond-> row p (assoc k v))` instead of `(assoc row k (when p v))`. The rule targets
+  deliberately storing nil; where a nil arises naturally and the straightforward code reads
+  better, leave it, rather than contorting the code to purge every nil.
 - **Flag known rough edges inline.** Leave a brief `;; MR:` comment marking something to
   revisit instead of resolving it silently or dropping it.
 - **Tests assert structure, tolerantly.** Assert that a result embeds the expected shape

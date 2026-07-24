@@ -174,7 +174,13 @@ each artifact's own format conventions — these notes are about wording, not fo
   docstring to the contract (principle 2): the behavior, inputs/outputs, and invariants a
   caller needs, not a tour of the internals. **Default to one sentence — what it returns or
   does.** Add a second only for an input, invariant, or gotcha the caller can't infer from the
-  signature (an error condition, a nil/empty edge, a required pre-narrowing). Past ~3 sentences,
+  signature (an error condition, a nil/empty edge, a required pre-narrowing). **Calibrate by
+  visibility.** A private helper gets the bare contract in one sentence — no mechanism, no
+  cross-references, and no mention of the standard domain concepts the surrounding code is built
+  on, because its only readers are already inside the namespace. Reserve standard-mechanism
+  mentions and sibling cross-references for the public API, and even there only where the behavior
+  would surprise the caller. Never name an implementation detail — a collaborator function, an
+  internal data shape, a pipeline phase — in any docstring. Past ~3 sentences,
   you are almost always explaining mechanism (*how* it works step by step), rationale (*why* it
   exists, what it's a dual of), or how it fits other functions — none of which the caller needs:
   cut it, or move a load-bearing *why* to a comment at the relevant line or an ADR. Symptoms to
