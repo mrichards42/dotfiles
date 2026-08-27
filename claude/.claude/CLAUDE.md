@@ -96,3 +96,9 @@ Specific conventions to apply as you write.
   revisit instead of resolving it silently or dropping it.
 - **Tests assert structure, tolerantly.** Assert that a result embeds the expected shape
   (`=check=> deep-embeds?*`) rather than massaging the actual value to match an exact literal.
+
+# Git
+
+Before making any changes in git, run `git status` to confirm the working tree
+is in the state you think it is. I will sometimes run git commands outside of a
+claude code session.
