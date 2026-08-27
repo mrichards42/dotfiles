@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Pull down unresolved comment threads from one or more PRs
+set -euo pipefail
+
+for branch in "${@:-$(git branch --show-current)}"; do
+  gh api graphql -F owner='{owner}' -F name='{repo}' -F branch="$branch" -f query='
+  query($owner:String!, $name:String!, $branch:String!) {
+    repository(owner:$owner, name:$name) {
+      pullRequests(headRefName:$branch, states:OPEN, first:1) {
+        nodes {
+          number
+          title
+          url
+          headRefName
+          reviewThreads(first:100) {
+            nodes {
+              isResolved isOutdated path line
+              comments(first:50) { nodes { author { login } body createdAt url } }
+            }
+          }
+        }
+      }
+    }
+  }' --jq '
+  .data.repository.pullRequests.nodes[0]
+   | {
+     branch: .headRefName,
+     number,
+     title,
+     url,
+     threads: [
+       .reviewThreads.nodes[] | select(.isResolved == false)
+     ]
+   }'
+done
