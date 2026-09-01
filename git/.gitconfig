@@ -20,7 +20,7 @@
       --preview "\"grep -o '[a-f0-9]\\{7,\\}' <<< {} | xargs git show --color=always\"" \
     | grep -o '[a-f0-9]\\{7,\\}'
   # List all branches in a stack
-  ls-stack = "!f() { git log --reverse --ancestry-path --format='%D' --decorate-refs='refs/heads/*' ${1:-refs/remotes/origin/HEAD}... | grep .; }; f"
+  ls-stack = "!f() { git log --reverse --ancestry-path --format='%D' --decorate-refs='refs/heads/*' ${1:-refs/remotes/origin/HEAD}...${2:-} | grep .; }; f"
   # Version tag helpers
   tag-current = !git tag --sort v:refname | tail -n1
   tag-next = !git tag-current | perl -pe 's/(\\d+)$/$1 + 1/e'
