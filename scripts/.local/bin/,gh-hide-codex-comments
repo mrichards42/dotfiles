@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Hide codex noise on a PR: "@codex review" triggers, codex's top-level comments
+# once every codex thread is resolved, and codex review bodies once their own
+# threads are resolved. Dry run unless --apply.
+#
+# usage: hide-codex-comments [PR] [--apply]
+set -euo pipefail
+
+PR="" APPLY=0
+for a in "$@"; do
+  case "$a" in --apply) APPLY=1 ;; *) PR="$a" ;; esac
+done
+[[ -n "$PR" ]] || PR=$(gh pr view --json number -q .number) ||
+  { echo "no PR for the current branch; pass one as an argument" >&2; exit 1; }
+
+QUERY='
+query ($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      comments(first: 100) {
+        nodes { id body isMinimized author { login } }
+      }
+      reviews(first: 100) {
+        nodes { id body isMinimized author { login } }
+      }
+      reviewThreads(first: 100) {
+        nodes {
+          isResolved
+          comments(first: 1) {
+            nodes { author { login } pullRequestReview { id } }
+          }
+        }
+      }
+    }
+  }
+}'
+
+MUTATION='
+mutation ($id: ID!) {
+  minimizeComment(input: { subjectId: $id, classifier: RESOLVED }) {
+    clientMutationId
+  }
+}'
+
+targets=$(gh api graphql -F owner='{owner}' -F name='{repo}' -F number="$PR" -f query="$QUERY" | jq -r '
+  def codex: (.author.login // "") | test("codex"; "i");
+  def body:  (.body // "") | gsub("^\\s+|\\s+$"; "");
+
+  .data.repository.pullRequest as $pr
+
+  # reviews that still have an unresolved codex thread
+  | [ $pr.reviewThreads.nodes[]
+      | select((.comments.nodes[0] | codex) and (.isResolved | not))
+      | .comments.nodes[0].pullRequestReview.id ] as $blocked
+
+  # a trigger, or codex with nothing of its own left open
+  | ( $pr.comments.nodes[]
+      | select((body | ascii_downcase) == "@codex review" or (codex and $blocked == [])) ),
+    ( $pr.reviews.nodes[]
+      | select(codex and (body != "") and (.id | IN($blocked[]) | not)) )
+
+  | select(.isMinimized | not)
+  | "\(.id)\t\(.author.login): \(body | gsub("\\s+"; " ")[0:60])"')
+
+[[ -n "$targets" ]] || { echo "nothing to hide on #$PR"; exit 0; }
+
+while IFS=$'\t' read -r id label; do
+  if (( ! APPLY )); then echo "would hide  $label"; continue; fi
+  if gh api graphql -f id="$id" -f query="$MUTATION" >/dev/null 2>&1
+  then echo "hid         $label"
+  else echo "CANNOT HIDE $label" >&2
+  fi
+done <<<"$targets"
