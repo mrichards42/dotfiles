@@ -10,7 +10,7 @@ shift
 before="$(sbx policy ls "$sandbox" --wide)"
 
 cleanup() {
-  sbx policy rm network --sandbox "$sandbox" --resource '**' || true
+  sbx policy rm network --sandbox "$sandbox" --resource '**' --force || true
   local after
   after="$(sbx policy ls "$sandbox" --wide)"
   echo "--- policy diff for $sandbox ---"
