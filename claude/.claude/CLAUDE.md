@@ -92,7 +92,7 @@ Specific conventions to apply as you write.
   `(cond-> row p (assoc k v))` instead of `(assoc row k (when p v))`. The rule targets
   deliberately storing nil; where a nil arises naturally and the straightforward code reads
   better, leave it, rather than contorting the code to purge every nil.
-- **Flag known rough edges inline.** Leave a brief `;; MR:` comment marking something to
+- **Flag known rough edges inline.** Leave a brief `;; TODO:` comment marking something to
   revisit instead of resolving it silently or dropping it.
 - **Tests assert structure, tolerantly.** Assert that a result embeds the expected shape
   (`=check=> deep-embeds?*`) rather than massaging the actual value to match an exact literal.
