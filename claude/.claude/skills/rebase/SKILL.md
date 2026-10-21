@@ -23,8 +23,9 @@ Default to `main` when no branch is named.
      original tip and target from `.git/rebase-merge/` (`orig-head`, `onto`) and
      go to step 3.
    - If the tree is dirty with no rebase in progress, stop and ask.
-2. **Rebase.** Fetch, then run `git rebase --update-refs --autosquash` onto the
-   newer of `<onto>` and `origin/<onto>`.
+2. **Rebase.** Fetch (if not in a network-restricted sandbox), then run
+   `git rebase --update-refs --autosquash` onto the newer of `<onto>` and
+   `origin/<onto>`.
 3. **Resolve conflicts.** Read upstream's change to each conflicted file and
    keep both sides' intent, including anything upstream added next to the
    branch's edits. Lint the auto-merged files too, since they can reference
