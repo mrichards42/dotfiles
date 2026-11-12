@@ -10,7 +10,7 @@ PR="" APPLY=0
 for a in "$@"; do
   case "$a" in --apply) APPLY=1 ;; *) PR="$a" ;; esac
 done
-[[ -n "$PR" ]] || PR=$(gh pr view --json number -q .number) ||
+[[ -n "$PR" ]] || PR=$(gh pr view "$(git branch --show-current)" --json number -q .number) ||
   { echo "no PR for the current branch; pass one as an argument" >&2; exit 1; }
 
 QUERY='
