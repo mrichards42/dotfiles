@@ -52,3 +52,4 @@ Default to `main` when no branch is named.
 
 5. **Report.** List the conflicts and how you resolved them, and what step 4
    changed. Note that pushing needs a force-push. Don't push unless asked.
+   When rebasing multiple branches, list all the branches, in order at the end.
