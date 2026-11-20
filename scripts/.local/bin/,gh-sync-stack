@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Push branches as stacked PRs, then set each PR's title and body from the
+# PR's first commit: the subject, and the body without its Co-Authored-By
+# lines, unwrapped with prettier when it's installed, since GitHub renders
+# each newline as a line break.
+# Follow-up commits leave the description alone. New PRs open as drafts
+# unless --open.
+#
+# usage: ,gh-sync-stack [--open] [BRANCH...]   (default: the current branch)
+set -euo pipefail
+
+OPEN=() BRANCHES=()
+for a in "$@"; do
+  case "$a" in --open) OPEN=(--open) ;; *) BRANCHES+=("$a") ;; esac
+done
+BRANCHES=("${BRANCHES[@]:-$(git branch --show-current)}")
+
+unwrap() {
+  if command -v prettier >/dev/null; then prettier --parser markdown --prose-wrap never; else cat; fi
+}
+
+# Init only when the current branch isn't in a stack yet.
+gh stack view >/dev/null 2>&1 || gh stack init "${BRANCHES[@]}"
+gh stack submit --auto ${OPEN[@]+"${OPEN[@]}"}
+
+for branch in "${BRANCHES[@]}"; do
+  first=$(gh pr view "$branch" --json commits -q '.commits[0]')
+  gh pr edit "$branch" \
+    --title "$(jq -r .messageHeadline <<<"$first")" \
+    --body "$(jq -r .messageBody <<<"$first" | sed '/^Co-Authored-By:/d' | unwrap)" >/dev/null
+  echo "updated $branch"
+done

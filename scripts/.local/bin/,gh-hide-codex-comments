@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
-# Hide codex noise on a PR: "@codex review" triggers, codex's top-level comments
-# once every codex thread is resolved, and codex review bodies once their own
-# threads are resolved. Dry run unless --apply.
+# Hide codex noise on each branch's PR: "@codex review" triggers, codex's
+# top-level comments once every codex thread is resolved, and codex review
+# bodies once their own threads are resolved. Dry run unless --apply.
 #
-# usage: hide-codex-comments [PR] [--apply]
+# usage: ,gh-hide-codex-comments [--apply] [BRANCH...]   (default: the current branch)
 set -euo pipefail
 
-PR="" APPLY=0
+APPLY=0 BRANCHES=()
 for a in "$@"; do
-  case "$a" in --apply) APPLY=1 ;; *) PR="$a" ;; esac
+  case "$a" in --apply) APPLY=1 ;; *) BRANCHES+=("$a") ;; esac
 done
-[[ -n "$PR" ]] || PR=$(gh pr view "$(git branch --show-current)" --json number -q .number) ||
-  { echo "no PR for the current branch; pass one as an argument" >&2; exit 1; }
+BRANCHES=("${BRANCHES[@]:-$(git branch --show-current)}")
 
 QUERY='
 query ($owner: String!, $name: String!, $number: Int!) {
@@ -42,32 +41,44 @@ mutation ($id: ID!) {
   }
 }'
 
-targets=$(gh api graphql -F owner='{owner}' -F name='{repo}' -F number="$PR" -f query="$QUERY" | jq -r '
-  def codex: (.author.login // "") | test("codex"; "i");
-  def body:  (.body // "") | gsub("^\\s+|\\s+$"; "");
+hide_codex_comments() {
+  local branch=$1 PR targets id label
+  PR=$(gh pr view "$branch" --json number -q .number) ||
+    { echo "$branch: no PR" >&2; return 1; }
 
-  .data.repository.pullRequest as $pr
+  targets=$(gh api graphql -F owner='{owner}' -F name='{repo}' -F number="$PR" -f query="$QUERY" | jq -r '
+    def codex: (.author.login // "") | test("codex"; "i");
+    def body:  (.body // "") | gsub("^\\s+|\\s+$"; "");
 
-  # reviews that still have an unresolved codex thread
-  | [ $pr.reviewThreads.nodes[]
-      | select((.comments.nodes[0] | codex) and (.isResolved | not))
-      | .comments.nodes[0].pullRequestReview.id ] as $blocked
+    .data.repository.pullRequest as $pr
 
-  # a trigger, or codex with nothing of its own left open
-  | ( $pr.comments.nodes[]
-      | select((body | ascii_downcase) == "@codex review" or (codex and $blocked == [])) ),
-    ( $pr.reviews.nodes[]
-      | select(codex and (body != "") and (.id | IN($blocked[]) | not)) )
+    # reviews that still have an unresolved codex thread
+    | [ $pr.reviewThreads.nodes[]
+        | select((.comments.nodes[0] | codex) and (.isResolved | not))
+        | .comments.nodes[0].pullRequestReview.id ] as $blocked
 
-  | select(.isMinimized | not)
-  | "\(.id)\t\(.author.login): \(body | gsub("\\s+"; " ")[0:60])"')
+    # a trigger, or codex with nothing of its own left open
+    | ( $pr.comments.nodes[]
+        | select((body | ascii_downcase) == "@codex review" or (codex and $blocked == [])) ),
+      ( $pr.reviews.nodes[]
+        | select(codex and (body != "") and (.id | IN($blocked[]) | not)) )
 
-[[ -n "$targets" ]] || { echo "nothing to hide on #$PR"; exit 0; }
+    | select(.isMinimized | not)
+    | "\(.id)\t\(.author.login): \(body | gsub("\\s+"; " ")[0:60])"')
 
-while IFS=$'\t' read -r id label; do
-  if (( ! APPLY )); then echo "would hide  $label"; continue; fi
-  if gh api graphql -f id="$id" -f query="$MUTATION" >/dev/null 2>&1
-  then echo "hid         $label"
-  else echo "CANNOT HIDE $label" >&2
-  fi
-done <<<"$targets"
+  [[ -n "$targets" ]] || { echo "#$PR ($branch): nothing to hide"; return; }
+
+  while IFS=$'\t' read -r id label; do
+    if (( ! APPLY )); then echo "#$PR would hide  $label"; continue; fi
+    if gh api graphql -f id="$id" -f query="$MUTATION" >/dev/null 2>&1
+    then echo "#$PR hid         $label"
+    else echo "#$PR CANNOT HIDE $label" >&2
+    fi
+  done <<<"$targets"
+}
+
+status=0
+for branch in "${BRANCHES[@]}"; do
+  hide_codex_comments "$branch" || status=1
+done
+exit $status
