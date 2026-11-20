@@ -131,3 +131,8 @@ Specific conventions to apply as you write.
 Before making any changes in git, run `git status` to confirm the working tree
 is in the state you think it is. I will sometimes run git commands outside of a
 claude code session.
+
+Commit (but do not push) each change as soon as it's made, so I can review it
+while you keep working. When a background test run finds a break, amend the
+commit it belongs to, or rebuild the stacked commits, rather than adding a
+fix-up commit.
