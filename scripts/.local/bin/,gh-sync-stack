@@ -21,7 +21,7 @@ unwrap() {
 
 # Init only when the current branch isn't in a stack yet.
 gh stack view >/dev/null 2>&1 || gh stack init "${BRANCHES[@]}"
-gh stack submit --auto ${OPEN[@]+"${OPEN[@]}"}
+gh stack submit --auto ${OPEN[@]+"${OPEN[@]}"} --remote origin
 
 for branch in "${BRANCHES[@]}"; do
   first=$(gh pr view "$branch" --json commits -q '.commits[0]')
